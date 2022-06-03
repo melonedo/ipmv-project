@@ -1,6 +1,9 @@
 #include <Eigen/dense>
 #include <opencv2/opencv.hpp>
 
+void real_main(void);
+
 int main() {
-    return 0;
+  real_main();
+  return 0;
 }

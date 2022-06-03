@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(stereo-camera CXX)
+project(stereo-camera CXX CUDA)
 
 # OpenCV
 find_package(OpenCV REQUIRED)
@@ -11,7 +11,7 @@ target_link_libraries(OpenCV INTERFACE ${OpenCV_LIBS})
 add_library(Eigen INTERFACE)
 target_include_directories(Eigen INTERFACE "${Eigen_INCLUDE_DIR}")
 
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp src/kernel.cu)
 
 target_link_libraries(main OpenCV Eigen)
 
@@ -24,3 +24,9 @@ endif()
 
 set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT main)
 
+if(MSVC)
+    target_compile_options(main PRIVATE
+        $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>: /utf-8 >
+        $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>: -Xcompiler=/utf-8>
+    )
+endif()
