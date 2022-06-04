@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(stereo-camera CXX CUDA)
+project(stereo-camera CXX)
 
 # OpenCV
 find_package(OpenCV REQUIRED)
@@ -11,9 +11,18 @@ target_link_libraries(OpenCV INTERFACE ${OpenCV_LIBS})
 add_library(Eigen INTERFACE)
 target_include_directories(Eigen INTERFACE "${Eigen_INCLUDE_DIR}")
 
-add_executable(main src/main.cpp src/kernel.cu)
+# OpenMP
+find_package(OpenMP REQUIRED)
 
-target_link_libraries(main OpenCV Eigen)
+add_executable(main
+    src/main.cpp
+    src/util.cpp
+    src/compute_cost.cpp
+    src/aggregate_cost.cpp
+    src/choose_disparity.cpp
+    src/refine_disparity.cpp)
+
+target_link_libraries(main OpenCV Eigen OpenMP::OpenMP_CXX)
 
 add_custom_target(run VERBATIM COMMAND main WORKING_DIRECTORY ${stereo-camera_SOURCE_DIR})
 
@@ -24,9 +33,14 @@ endif()
 
 set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT main)
 
+set_target_properties(main PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    VS_DEBUGGER_COMMAND_ARGUMENTS "data/artroom1")
+
 if(MSVC)
     target_compile_options(main PRIVATE
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>: /utf-8 >
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>: -Xcompiler=/utf-8>
     )
 endif()
+
