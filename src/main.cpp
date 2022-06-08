@@ -36,8 +36,7 @@ int main(int argc, const char *argv[]) {
 
   t1 = high_resolution_clock::now();
 
-  compute_cost(image_l, cost_l);
-  compute_cost(image_r, cost_r);
+  compute_cost(image_l, image_r, cost_l, cost_r);
 
   aggregate_cost(cost_l, cost_out_l);
   aggregate_cost(cost_r, cost_out_r);

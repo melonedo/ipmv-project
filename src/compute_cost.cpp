@@ -1,152 +1,173 @@
-#include "pipeline.hpp"
 #include <math.h>
-#define Row 2000
-#define Col 1100
+
+#include "pipeline.hpp"
 
 using namespace cv;
 
-void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L, Mat& cost_R) {
-  cost.setTo(Scalar::all(0));
+#define rad 1
 
-  int sum[Row][Col];
-  int sum_L[Row][Col], sum_R[Row][Col];
-  int sqr_sum_L[Row][Col], sqr_sum_R[Row][Col];
+void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
+                  Mat& cost_R) {
+  size_t Row = image_L.size[0];
+  size_t Col = image_L.size[1];
+  size_t MaxDistance = cost_L.size[2];
+
+  Mat sum(Row, Col, CV_32SC1);
+  Mat sum_L(Row, Col, CV_32SC1);
+  Mat sum_R(Row, Col, CV_32SC1);
+  Mat sqr_sum_L(Row, Col, CV_32SC1);
+  Mat sqr_sum_R(Row, Col, CV_32SC1);
+
   int pixels;
-  float SumLeftRight;
-  float PixelIntensityLeft, PixelIntensityRight;
-  float StandardDeviationLeft, StandardDeviationRight;
+  float sum_LR;
+  float I_L, I_R;
+  float var_L, var_R;
   int xMax_L, xMin_L, yMax_L, yMin_L;
   int xMax_R, xMin_R, yMax_R, yMin_R;
   int i, j, d;
 
-  //×óÍ¼»Ò¶ÈÇ°×ººÍ
-  sum_L[0][0] = image_L.ptr<uchar>(0)[0];
-  for (j = 1; j < image_L.col; j++)
-    sum_L[0][j] = sum_L[0][j - 1] + image_L.ptr<uchar>(0)[j];
-  for (i = 1; i < image_L.row; i++) {
-    sum_L[i][0] = sum_L[i - 1][0] + image_L.ptr<uchar>(i)[0];
-    for (j = 1; j < image_L.col; j++)
-      sum_L[i][j] = sum_L[i][j - 1] + sum_L[i - 1][j] - sum_L[i - 1][j - 1] +
-                    image_L.ptr<uchar>(i)[j];
+  //å·¦å›¾ç°åº¦å‰ç¼€å’Œ
+  sum_L.at<int32_t>(0, 0) = image_L.at<uint8_t>(0, 0);
+  for (j = 1; j < Col; j++)
+    sum_L.at<int32_t>(0, j) =
+        sum_L.at<int32_t>(0, j - 1) + image_L.at<uint8_t>(0, j);
+  for (i = 1; i < Row; i++) {
+    sum_L.at<int32_t>(i, 0) =
+        sum_L.at<int32_t>(i - 1, 0) + image_L.at<uint8_t>(i, 0);
+    for (j = 1; j < Col; j++)
+      sum_L.at<int32_t>(i, j) =
+          sum_L.at<int32_t>(i, j - 1) + sum_L.at<int32_t>(i - 1, j) -
+          sum_L.at<int32_t>(i - 1, j - 1) + image_L.at<uint8_t>(i, j);
   }
 
-  //ÓÒÍ¼»Ò¶ÈÇ°×ººÍ
-  sum_R[0][0] = image_R.ptr<uchar>(0)[0];
-  for (j = 1; j < image_R.col; j++)
-    sum_R[0][j] = sum_R[0][j - 1] + image_R.ptr<uchar>(0)[j];
-  for (i = 1; i < image_R.row; i++) {
-    sum_R[i][0] = sum_R[i - 1][0] + image_R.ptr<uchar>(i)[0];
-    for (j = 1; j < image_R.col; j++)
-      sum_R[i][j] = sum_R[i - 1][j] + sum_R[i][j - 1] - sum_R[i - 1][j - 1] +
-                    image_R.ptr<uchar>(i)[j];
+  //å³å›¾ç°åº¦å‰ç¼€å’Œ
+  sum_R.at<int32_t>(0, 0) = image_R.at<uint8_t>(0, 0);
+  for (j = 1; j < Col; j++)
+    sum_R.at<int32_t>(0, j) =
+        sum_R.at<int32_t>(0, j - 1) + image_R.at<uint8_t>(0, j);
+  for (i = 1; i < Row; i++) {
+    sum_R.at<int32_t>(i, 0) =
+        sum_R.at<int32_t>(i - 1, 0) + image_R.at<uint8_t>(i, 0);
+    for (j = 1; j < Col; j++)
+      sum_R.at<int32_t>(i, j) =
+          sum_R.at<int32_t>(i - 1, j) + sum_R.at<int32_t>(i, j - 1) -
+          sum_R.at<int32_t>(i - 1, j - 1) + image_R.at<uint8_t>(i, j);
   }
 
-  //×óÍ¼»Ò¶ÈÆ½·½Ç°×ººÍ
-  sqr_sum_L[0][0] = image_L.ptr<uchar>(0)[0] * image_L.ptr<uchar>(0)[0];
-  for (j = 1; j < image_L.col; j++)
-    sqr_sum_L[0][j] = sqr_sum_L[0][j - 1] +
-                      image_L.ptr<uchar>(0)[j] * image_L.ptr<uchar>(0)[j];
-  for (i = 1; i < image_L.row; i++) {
-    sqr_sum_L[i][0] = sqr_sum_L[i - 1][0] +
-                      image_L.ptr<uchar>(i)[0] * image_L.ptr<uchar>(i)[0];
-    for (j = 1; j < image_L.col; j++)
-      sqr_sum_L[i][j] = sqr_sum_L[i][j - 1] + sqr_sum_L[i - 1][j] -
-                        sqr_sum_L[i - 1][j - 1] +
-                        image_L.ptr<uchar>(i)[j] * image_L.ptr<uchar>(i)[j];
+  //å·¦å›¾ç°åº¦å¹³æ–¹å‰ç¼€å’Œ
+  sqr_sum_L.at<int32_t>(0, 0) =
+      image_L.at<uint8_t>(0, 0) * image_L.at<uint8_t>(0, 0);
+  for (j = 1; j < Col; j++)
+    sqr_sum_L.at<int32_t>(0, j) =
+        sqr_sum_L.at<int32_t>(0, j - 1) +
+        image_L.at<uint8_t>(0, j) * image_L.at<uint8_t>(0, j);
+  for (i = 1; i < Row; i++) {
+    sqr_sum_L.at<int32_t>(i, 0) =
+        sqr_sum_L.at<int32_t>(i - 1, 0) +
+        image_L.at<uint8_t>(i, 0) * image_L.at<uint8_t>(i, 0);
+    for (j = 1; j < Col; j++)
+      sqr_sum_L.at<int32_t>(i, j) =
+          sqr_sum_L.at<int32_t>(i, j - 1) + sqr_sum_L.at<int32_t>(i - 1, j) -
+          sqr_sum_L.at<int32_t>(i - 1, j - 1) +
+          image_L.at<uint8_t>(i, j) * image_L.at<uint8_t>(i, j);
   }
 
-  //ÓÒÍ¼»Ò¶ÈÆ½·½Ç°×ººÍ
-  sqr_sum_R[0][0] = image_R.ptr<uchar>(0)[0] * image_R.ptr<uchar>(0)[0];
-  for (j = 1; j < image_R.col; j++)
-    sqr_sum_R[0][j] = sqr_sum_R[0][j - 1] +
-                      image_R.ptr<uchar>(0)[j] * image_R.ptr<uchar>(0)[j];
-  for (i = 1; i < image_R.row; i++) {
-    sqr_sum_R[i][0] = sqr_sum_R[i - 1][0] +
-                      image_R.ptr<uchar>(i)[0] * image_R.ptr<uchar>(i)[0];
-    for (j = 1; j < image_R.col; j++)
-      sqr_sum_R[i][j] = sqr_sum_R[i][j - 1] + sqr_sum_R[i - 1][j] -
-                        sqr_sum_R[i - 1][j - 1] +
-                        image_R.ptr<uchar>(i)[j] * image_R.ptr<uchar>(i)[j];
+  //å³å›¾ç°åº¦å¹³æ–¹å‰ç¼€å’Œ
+  sqr_sum_R.at<int32_t>(0, 0) =
+      image_R.at<uint8_t>(0, 0) * image_R.at<uint8_t>(0, 0);
+  for (j = 1; j < Col; j++)
+    sqr_sum_R.at<int32_t>(0, j) =
+        sqr_sum_R.at<int32_t>(0, j - 1) +
+        image_R.at<uint8_t>(0, j) * image_R.at<uint8_t>(0, j);
+  for (i = 1; i < Row; i++) {
+    sqr_sum_R.at<int32_t>(i, 0) =
+        sqr_sum_R.at<int32_t>(i - 1, 0) +
+        image_R.at<uint8_t>(i, 0) * image_R.at<uint8_t>(i, 0);
+    for (j = 1; j < Col; j++)
+      sqr_sum_R.at<int32_t>(i, j) =
+          sqr_sum_R.at<int32_t>(i, j - 1) + sqr_sum_R.at<int32_t>(i - 1, j) -
+          sqr_sum_R.at<int32_t>(i - 1, j - 1) +
+          image_R.at<uint8_t>(i, j) * image_R.at<uint8_t>(i, j);
   }
 
   for (d = 0; d <= MaxDistance; d++) {
-    //·Ö×ÓÇ°×ººÍ
-    sum[d][0] = image_L.ptr<uchar>(d)[0] * image_R.ptr<uchar>(0)[0];
-    for (j = 1; j < image_L.col; j++)
-      sum[d][j] =
-          sum[d][j - 1] + image_L.ptr<uchar>(d)[j] * image_R.ptr<uchar>(0)[j];
-    for (i = d + 1; i < image_L.row; i++) {
-      sum[i][0] = sum[i - 1][0] +
-                  image_L.ptr<uchar>(i)[0] * image_R.ptr<uchar>(i - d)[0];
-      for (j = 1; j < image_L.col; j++)
-        sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] +
-                    image_L.ptr<uchar>(i)[j] * image_R.ptr<uchar>(i - d)[j];
+    //åˆ†å­å‰ç¼€å’Œ
+    sum.at<int32_t>(d, 0) =
+        image_L.at<uint8_t>(d, 0) * image_R.at<uint8_t>(0, 0);
+    for (j = 1; j < Col; j++)
+      sum.at<int32_t>(d, j) =
+          sum.at<int32_t>(d, j - 1) +
+          image_L.at<uint8_t>(d, j) * image_R.at<uint8_t>(0, j);
+    for (i = d + 1; i < Row; i++) {
+      sum.at<int32_t>(i, 0) =
+          sum.at<int32_t>(i - 1, 0) +
+          image_L.at<uint8_t>(i, 0) * image_R.at<uint8_t>(i - d, 0);
+      for (j = 1; j < Col; j++)
+        sum.at<int32_t>(i, j) =
+            sum.at<int32_t>(i - 1, j) + sum.at<int32_t>(i, j - 1) -
+            sum.at<int32_t>(i - 1, j - 1) +
+            image_L.at<uint8_t>(i, j) * image_R.at<uint8_t>(i - d, j);
     }
 
-    for (i = d; i < image_L.row; i++)
-      for (j = 0; j < image_L.col; j++) {
-		//×óÍ¼Çø¿é
-        xMax_L = (i + rad) < image_L.row ? (i + rad) : image_L.row;
+    for (i = d; i < Row; i++)
+      for (j = 0; j < Col; j++) {
+        //å·¦å›¾åŒºå—
+        xMax_L = (i + rad) < Row ? (i + rad) : Row;
         xMin_L = (i - rad) > 0 ? (i - rad) : 0;
-        yMax_L = (j + rad) < image_L.col ? (j + rad) : image_L.col;
+        yMax_L = (j + rad) < Col ? (j + rad) : Col;
         yMin_L = (j - rad) > 0 ? (j - rad) : 0;
-		//ÓÒÍ¼Çø¿é
-        xMax_R = (i - d + rad) < image_R.row ? (i - d + rad) : image_R.row;
+        //å³å›¾åŒºå—
+        xMax_R = (i - d + rad) < Row ? (i - d + rad) : Row;
         xMin_R = (i - d - rad) > 0 ? (i - d - rad) : 0;
-        yMax_R = (j + rad) < image_R.col ? (j + rad) : image_R.col;
+        yMax_R = (j + rad) < Col ? (j + rad) : Col;
         yMin_R = (j - rad) > 0 ? (j - rad) : 0;
-		//ÏñËØ¸öÊı
+        //åƒç´ ä¸ªæ•°
         pixels = (2 * rad + 1) * (2 * rad + 1);
-		//×óÍ¼ÏñËØÇ¿¶ÈºÍ±ê×¼²î
-        PixelIntensityLeft = sum_L[xMax_L][yMax_L];
-        StandardDeviationLeft = sqr_sum_L[xMax_L][yMax_L];
+        //å·¦å›¾åƒç´ å¼ºåº¦å’Œæ ‡å‡†å·®
+        I_L = sum_L.at<int32_t>(xMax_L, yMax_L);
+        var_L = sqr_sum_L.at<int32_t>(xMax_L, yMax_L);
         if (xMin_L != 0) {
-          PixelIntensityLeft -= sum_L[xMin_L - 1][yMax_L];
-          StandardDeviationLeft -= sqr_sum_L[xMin_L - 1][yMax_L];
+          I_L -= sum_L.at<int32_t>(xMin_L - 1, yMax_L);
+          var_L -= sqr_sum_L.at<int32_t>(xMin_L - 1, yMax_L);
         }
         if (yMin_L != 0) {
-          PixelIntensityLeft -= sum_L[xMax_L][yMin_L - 1];
-          StandardDeviationLeft -= sqr_sum_L[xMax_L][yMin_L - 1];
+          I_L -= sum_L.at<int32_t>(xMax_L, yMin_L - 1);
+          var_L -= sqr_sum_L.at<int32_t>(xMax_L, yMin_L - 1);
         }
         if (xMin_L != 0 && yMin_L != 0) {
-          PixelIntensityLeft += sum_L[xMin_L - 1][yMin_L - 1];
-          StandardDeviationLeft += sqr_sum_L[xMin_L - 1][yMin_L - 1];
+          I_L += sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
+          var_L += sqr_sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
         }
-        StandardDeviationLeft =
-            sqrt(StandardDeviationLeft -
-                 PixelIntensityLeft * PixelIntensityLeft / (float) pixels);
-        PixelIntensityLeft /= (float)pixels;
-        //ÓÒÍ¼ÏñËØÇ¿¶ÈºÍ±ê×¼²î
-        PixelIntensityRight = sum_R[xMax_R][yMax_R];
-        StandardDeviationRight = sqr_sum_R[xMax_R][yMax_R];
+        var_L = sqrt(var_L - I_L * I_L / (float)pixels);
+        I_L /= (float)pixels;
+        //å³å›¾åƒç´ å¼ºåº¦å’Œæ ‡å‡†å·®
+        I_R = sum_R.at<int32_t>(xMax_R, yMax_R);
+        var_R = sqr_sum_R.at<int32_t>(xMax_R, yMax_R);
         if (xMin_R != 0) {
-          PixelIntensityRight -= sum_R[xMin_R - 1][yMax_R];
-          StandardDeviationRight -= sqr_sum_R[xMin_R - 1][yMax_R];
+          I_R -= sum_R.at<int32_t>(xMin_R - 1, yMax_R);
+          var_R -= sqr_sum_R.at<int32_t>(xMin_R - 1, yMax_R);
         }
         if (yMin_R != 0) {
-          PixelIntensityRight -= sum_R[xMax_R][yMin_R - 1];
-          StandardDeviationRight -= sqr_sum_R[xMax_R][yMin_R - 1];
+          I_R -= sum_R.at<int32_t>(xMax_R, yMin_R - 1);
+          var_R -= sqr_sum_R.at<int32_t>(xMax_R, yMin_R - 1);
         }
         if (xMin_R != 0 && yMin_R != 0) {
-          PixelIntensityRight += sum_R[xMin_R - 1][yMin_R - 1];
-          StandardDeviationRight += sqr_sum_R[xMin_R - 1][yMin_R - 1];
+          I_R += sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
+          var_R += sqr_sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
         }
-        StandardDeviationRight =
-            sqrt(StandardDeviationRight -
-                 PixelIntensityRight * PixelIntensityRight / (float)pixels);
-        PixelIntensityRight /= (float)pixels;
-		//×óÓÒÍ¼¶Ô±È
-		SumLeftRight = sum[xMax_L][yMax_L];
-        if (xMin_L != 0) SumLeftRight -= sum[xMin_L - 1][yMax_L];
-        if (yMin_L != 0) SumLeftRight -= sum[xMax_L][yMin_L - 1];
-        if (xMin_L != 0 && yMin_L != 0) SumLeftRight += sum[xMin_L - 1][yMin_L - 1];
-		
-        cost_L.at<float>(i, j, d) = (SumLeftRight -
-             (float)pixels * PixelIntensityLeft * PixelIntensityRight) /
-            (StandardDeviationLeft * StandardDeviationRight);
-        cost_R.at<float>(i - d, j, d) = (SumLeftRight -
-			 (float)pixels * PixelIntensityLeft * PixelIntensityRight) /
-            (StandardDeviationLeft * StandardDeviationRight);
+        var_R = sqrt(var_R - I_R * I_R / (float)pixels);
+        I_R /= (float)pixels;
+        //å·¦å³å›¾å¯¹æ¯”
+        sum_LR = sum.at<int32_t>(xMax_L, yMax_L);
+        if (xMin_L != 0) sum_LR -= sum.at<int32_t>(xMin_L - 1, yMax_L);
+        if (yMin_L != 0) sum_LR -= sum.at<int32_t>(xMax_L, yMin_L - 1);
+        if (xMin_L != 0 && yMin_L != 0)
+          sum_LR += sum.at<int32_t>(xMin_L - 1, yMin_L - 1);
+
+        cost_L.at<float>(i, j, d) =
+            (sum_LR - (float)pixels * I_L * I_R) / (var_L * var_R);
+        cost_R.at<float>(i - d, j, d) =
+            (sum_LR - (float)pixels * I_L * I_R) / (var_L * var_R);
       }
   }
 }
