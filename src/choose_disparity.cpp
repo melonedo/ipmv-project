@@ -7,17 +7,14 @@ using namespace cv;
 
 #define rad 1
 
-void choose_disparity(const Mat& cost_L, const Mat& cost_R, Mat& disp_L,Mat& disp_R) {
+void choose_disparity(const Mat& cost, Mat& disp) {
 
-  size_t Row = cost_L.size[1];
-  size_t Col = cost_L.size[2];
+  size_t Row = cost.size[1];
+  size_t Col = cost.size[2];
 
-  float cost_value_l = 0;
-  float cost_value_r = 0;
-  float max_value_l = 0;
-  float max_value_r = 0;
-  unsigned int disp_value_l = 0;
-  unsigned int disp_value_r = 0;
+  float cost_value = 0;
+  float max_value = 0;
+  unsigned int disp_value = 0;
   int dmin = 0;
   int dmax = 142;
   int x, y, d;
@@ -25,19 +22,13 @@ void choose_disparity(const Mat& cost_L, const Mat& cost_R, Mat& disp_L,Mat& dis
   for (int x = 1 + rad; x < Row - 1 - rad; x++) {
     for (int y = 1 + rad; y < Col - 1 - rad; y++) {
       for (int k = dmin; k < dmax; k++) {
-        cost_value_l = cost_L.at<float>(k, x, y);
-        cost_value_r = cost_R.at<float>(k, x, y);
-        if ((cost_value_l > max_value_l)) {
-          max_value_l = cost_value_l;
-          disp_value_l = k;
-        }
-        if ((cost_value_r > max_value_r)) {
-          max_value_r = cost_value_r;
-          disp_value_r = k;
+        cost_value = cost.at<float>(k, x, y);
+        if ((cost_value > max_value)) {
+          max_value = cost_value;
+          disp_value = k;
         }
       }
-      disp_L.at<float>(x, y) = disp_value_l;
-      disp_R.at<float>(x, y) = disp_value_r;
+      disp.at<float>(x, y) = disp_value;
     }
   }
 
