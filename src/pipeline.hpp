@@ -2,6 +2,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#define RAD 1
+
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
 

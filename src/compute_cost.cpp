@@ -7,7 +7,6 @@
 using namespace cv;
 using namespace std;
 
-#define RAD 1
 
 // #define SHOW_DISPARITY
 
@@ -17,7 +16,6 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
   const size_t Col = image_L.size[1];
   const size_t MaxDistance = cost_L.size[0];
 
-  Mat sum(Row, Col, CV_32SC1);
   Mat sum_L(Row, Col, CV_32SC1);
   Mat sum_R(Row, Col, CV_32SC1);
   Mat sqr_sum_L(Row, Col, CV_32SC1);
@@ -92,10 +90,15 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
           gray_R.at<uint8_t>(x, y) * gray_R.at<uint8_t>(x, y);
   }
 
+  cost_L.setTo(Scalar::all(0));
+  cost_R.setTo(Scalar::all(0));
+
+#pragma omp parallel for
   for (int d = 0; d < MaxDistance; d++) {
 #ifdef SHOW_DISPARITY
     Mat temp(Row, Col, CV_32FC1);
 #endif
+    Mat sum(Row, Col, CV_32SC1);
     //分子前缀和，以左图坐标为准
     sum.at<int32_t>(0, d) = gray_L.at<uint8_t>(0, d) * gray_R.at<uint8_t>(0, 0);
     for (int y = d + 1; y < Col; y++)
