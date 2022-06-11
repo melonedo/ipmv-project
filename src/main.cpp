@@ -50,10 +50,10 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  imshow("result", disp_out);
+  // imshow("result", disp_out);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
+  // imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();
   return 0;
