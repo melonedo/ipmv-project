@@ -33,6 +33,7 @@ int main(int argc, const char *argv[]) {
   Mat disp_out{shape2, CV_32FC1};
 
   Mat reference_l{shape2, CV_8UC1};
+  Mat reference_r{shape2, CV_8UC1};
 
   using namespace std::chrono;
   high_resolution_clock::time_point t1, t2;
@@ -40,14 +41,15 @@ int main(int argc, const char *argv[]) {
   t1 = high_resolution_clock::now();
 
   construct_tree(image_l, reference_l);
+  construct_tree(image_r, reference_r);
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
   aggregate_cost(cost_l, image_l, reference_l, cost_out_l);
-  // aggregate_cost(cost_r, image_l, reference_l, cost_out_r);
+  aggregate_cost(cost_r, image_r, reference_r, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
-  // choose_disparity(cost_out_r, disp_r);
+  choose_disparity(cost_out_r, disp_r);
 
   // refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
 
@@ -55,9 +57,13 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  imshow("result", disp_l);
+  namedWindow("result_l", WINDOW_NORMAL);
+  namedWindow("result_r", WINDOW_NORMAL);
+  imshow("result_l", disp_l);
+  imshow("result_r", disp_r);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
+  namedWindow("truth", WINDOW_NORMAL);
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();

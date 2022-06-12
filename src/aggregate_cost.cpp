@@ -5,7 +5,9 @@
 
 using namespace cv;
 
-#define sigma (.1f * 255)
+#define sigma (.5f * 255)
+
+// #define SHOW_AGGREGATION
 
 uint8_t calculate_weight(Vec3b l, Vec3b r);
 
@@ -167,19 +169,25 @@ void aggregate_cost(const Mat& cost_in, const Mat& image, const Mat& graph,
   for (int i = 0; i < 256; i++) {
     coef[i] = std::exp(-i / sigma);
   }
+
+#ifndef SHOW_AGGREGATION
 #pragma omp parallel for
+#endif
   for (int d = 0; d < MaxDistance; d++) {
     const float* cost_in_ptr = cost_in.ptr<float>(d);
     float* cost_out_ptr = cost_out.ptr<float>(d);
     Mat_<float> cost_rec_(Row, Col);
     compute_cost_rec(cost_in_ptr, image_, graph_, coef, cost_rec_);
     compute_cost_d(cost_in_ptr, image_, graph_, cost_rec_, coef, cost_out_ptr);
-    // namedWindow("test", WINDOW_NORMAL);
-    // Mat temp = Mat(Row, Col, CV_32FC1, cost_out_ptr) / 1;
-    // using namespace std::string_literals;
-    // putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
-    //         Scalar{1}, 5, 8, false);
-    // imshow("test", temp);
-    // waitKey(1);
+
+#ifdef SHOW_AGGREGATION
+    namedWindow("test", WINDOW_NORMAL);
+    Mat temp = Mat(Row, Col, CV_32FC1, cost_out_ptr) / 1000;
+    using namespace std::string_literals;
+    putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
+            Scalar{1}, 5, 8, false);
+    imshow("test", temp);
+    waitKey(1);
+#endif
   }
 }

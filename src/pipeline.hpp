@@ -2,9 +2,9 @@
 
 #include <opencv2/opencv.hpp>
 
-#define RAD 1
+#define RAD 2
 
-#define GRAPH_ROOT 961200
+#define GRAPH_ROOT 1153000
 
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
