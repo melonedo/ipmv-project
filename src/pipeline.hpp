@@ -18,7 +18,6 @@ void refine_disparity(const cv::Mat& disp_l, const cv::Mat& disp_r,
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
                           const cv::Mat& KL, const cv::Mat& KR,
                           const cv::Mat& DL, const cv::Mat& DR,
-                          const cv::Mat& R, const cv::Mat& T,
-                          Mat& image_l_rected, Mat& image_r_rected);
+                          const cv::Mat& R, const cv::Mat& T, cv::Mat & image_l_rected, cv::Mat& image_r_rected);
 
 void construct_tree(const cv::Mat& in, cv::Mat& out);

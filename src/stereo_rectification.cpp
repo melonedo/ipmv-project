@@ -20,7 +20,7 @@ using namespace std;
                           const cv::Mat& KL,const cv::Mat& KR,
                           const cv::Mat& DL, const cv::Mat& DR,
                           const cv::Mat& R,const cv::Mat& T,
-                          Mat& image_l_rected,Mat& image_r_rected) {////两张原图，内参矩阵K(双目标定获得)，畸变系数向量D，R、T，最后两个是输出
+                          cv::Mat& image_l_rected,cv::Mat& image_r_rected) {////两张原图，内参矩阵K(双目标定获得)，畸变系数向量D，R、T，最后两个是输出
                           
                          
 
