@@ -93,7 +93,9 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
   cost_L.setTo(Scalar::all(0));
   cost_R.setTo(Scalar::all(0));
 
+#ifndef SHOW_DISPARITY
 #pragma omp parallel for
+#endif
   for (int d = 0; d < MaxDistance; d++) {
 #ifdef SHOW_DISPARITY
     Mat temp(Row, Col, CV_32FC1);
