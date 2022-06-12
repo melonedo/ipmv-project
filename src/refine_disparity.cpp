@@ -13,11 +13,12 @@ void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
   const size_t MaxDistance = cost.size[0];
   const size_t Row = disp_l.size[0];
   const size_t Col = disp_l.size[1];
+  disp_out = disp_l.clone();
 #pragma omp parallel for
   for (int x = 1 + RAD; x < Row - 1 - RAD; x++) {
     for (int y = 1 + RAD; y < Col - 1 - RAD; y++) {
       unsigned int dl = disp_l.at<uint8_t>(x, y);
-      unsigned int dr = disp_r.at<uint8_t>(x, y - dl);
+      unsigned int dr = disp_r.at<uint8_t>(x - dl, y );
       if (abs(dl - dr) > threshold) {
         disp_out.at<float>(x, y) = 0;
       } else if (dl >= 1 + tau && dl + 1 + tau < MaxDistance) {
