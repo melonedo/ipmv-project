@@ -20,7 +20,9 @@ add_executable(main
     src/compute_cost.cpp
     src/aggregate_cost.cpp
     src/choose_disparity.cpp
-    src/refine_disparity.cpp)
+    src/refine_disparity.cpp
+    src/construct_graph.cpp
+)
 
 target_link_libraries(main OpenCV Eigen OpenMP::OpenMP_CXX)
 
@@ -44,3 +46,4 @@ if(MSVC)
     )
 endif()
 
+target_compile_features(main PRIVATE cxx_std_17)

@@ -4,7 +4,7 @@
 
 #include "pipeline.hpp"
 
-#define threshold 30
+#define threshold 3000
 #define tau 2
 using namespace cv;
 
