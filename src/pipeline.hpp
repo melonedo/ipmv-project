@@ -13,3 +13,8 @@ void choose_disparity(const cv::Mat& cost, cv::Mat& disp);
 
 void refine_disparity(const cv::Mat& disp_l, const cv::Mat& disp_r,
                       const cv::Mat& cost, cv::Mat& disp_out);
+void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
+                          const cv::Mat& KL, const cv::Mat& KR,
+                          const cv::Mat& DL, const cv::Mat& DR,
+                          const cv::Mat& R, const cv::Mat& T,
+                          Mat& image_l_rected, Mat& image_r_rected);
