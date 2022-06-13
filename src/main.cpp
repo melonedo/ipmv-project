@@ -51,16 +51,18 @@ int main(int argc, const char *argv[]) {
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
 
-  // refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
+  refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
 
   t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  namedWindow("result_l", WINDOW_NORMAL);
-  namedWindow("result_r", WINDOW_NORMAL);
-  imshow("result_l", disp_l);
-  imshow("result_r", disp_r);
+  /*namedWindow("result_l", WINDOW_NORMAL);
+  namedWindow("result_r", WINDOW_NORMAL);*/
+  namedWindow("result_out", WINDOW_NORMAL);
+ /* imshow("result_l", disp_l);
+  imshow("result_r", disp_r);*/
+  imshow("result_out", disp_out);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   namedWindow("truth", WINDOW_NORMAL);
