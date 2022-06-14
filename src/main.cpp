@@ -21,6 +21,10 @@ int main(int argc, const char *argv[]) {
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
+ /* Mat image_l_rected{shape3, CV_64FC1};
+  Mat image_r_rected{shape3, CV_64FC1};
+ 
+  stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);*/
   Mat cost_l{shape3, CV_32FC1};
   Mat cost_r{shape3, CV_32FC1};
 
@@ -47,7 +51,7 @@ int main(int argc, const char *argv[]) {
 
   aggregate_cost(cost_l, image_l, reference_l, cost_out_l);
   aggregate_cost(cost_r, image_r, reference_r, cost_out_r);
-
+ 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
 
@@ -57,12 +61,15 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  /*namedWindow("result_l", WINDOW_NORMAL);
-  namedWindow("result_r", WINDOW_NORMAL);*/
+  
+  namedWindow("result_l", WINDOW_NORMAL);
+  namedWindow("result_r", WINDOW_NORMAL);
   namedWindow("result_out", WINDOW_NORMAL);
- /* imshow("result_l", disp_l);
-  imshow("result_r", disp_r);*/
+  
+  imshow("result_l", disp_l);
+  imshow("result_r", disp_r);
   imshow("result_out", disp_out);
+ 
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   namedWindow("truth", WINDOW_NORMAL);

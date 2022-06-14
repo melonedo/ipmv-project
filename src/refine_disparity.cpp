@@ -4,23 +4,27 @@
 
 #include "pipeline.hpp"
 
-#define threshold 1
+#define threshold 15
 #define tau 2
+
 using namespace cv;
 
 void refine_disparity(const Mat& disp_l,
                       const Mat& disp_r, const Mat& cost,
                       Mat& disp_out) {
   const size_t MaxDistance = cost.size[0];//Maxdsitance=170
-  const size_t Row = cost.size[0];
-  const size_t Col = cost.size[1];
-  disp_l.copyTo(disp_out);
+  const size_t Row = disp_l.size[0];
+  const size_t Col = disp_l.size[1];
+  disp_out = disp_r.clone();
   /*imshow("disp_out", disp_out);*/
+  int n = 0;
+  /*disp_out.setTo(Scalar::all(170));*/
 #pragma omp parallel for
   for (int x = 1 + RAD; x < Row - 2 - RAD; x++) {
     for (int y = 1 + RAD; y < Col - 2 - RAD; y++) {
-      unsigned int dl = disp_l.at<uint8_t>(x, y);
-      unsigned int dr = disp_r.at<uint8_t>(y*Row+x-dl);
+      
+      uint8_t dr = disp_r.at<uint8_t>(x, y );
+      uint8_t dl = disp_l.at<uint8_t>(x, y+ dr);
       if (abs(dl - dr)> threshold) {
         disp_out.at<float>(x, y) = 0;
       }
@@ -28,15 +32,17 @@ void refine_disparity(const Mat& disp_l,
         float cl = cost.at<float>((dl - 1 + tau), x, y);
         float cr = cost.at<float>((dl + 1 + tau), x, y);
         float cm = cost.at<float>((dl + tau), x, y);
-        if ((cm > cl) && (cm > cr)) {
+        if ((cm < cl) && (cm < cr)) {
+          n++;
           float d = (cl - cr) / (2 * cl + 2 * cr - 4 * cm) + dl;
-          disp_out.at<float>(x, y) = d;
-        }
+          disp_out.at<uint8_t>(x, y) = d;
+        } 
       }
     }
   }
-  // imshow("disp1", disp_out);
-  // waitKey(1);
+  /*std::cout << "n=" << n << std::endl;*/
+   /*imshow("disp1", disp_out);
+   waitKey(1);*/
 }
 
 // 1.int dl = disp_l.at<uint8_t>(x-dl, y);减去dl不会溢出吗？

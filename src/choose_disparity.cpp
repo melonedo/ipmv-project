@@ -9,6 +9,7 @@ void choose_disparity(const Mat& cost, Mat& disp) {
   const size_t MaxDistance = cost.size[0];
   const size_t Row = cost.size[1];
   const size_t Col = cost.size[2];
+  
 #pragma omp parallel for
   for (int x = 1 + RAD; x < Row - 2 - RAD; x++) {
     for (int y = 1 + RAD; y < Col - 2 - RAD; y++) {
@@ -19,12 +20,12 @@ void choose_disparity(const Mat& cost, Mat& disp) {
         if ((cost_value > max_value)) {
           max_value = cost_value;
           disp_value = k;
-        }
+        }      
       }
       disp.at<uint8_t>(x, y) = disp_value;
     }
   }
- /* imshow("disp0", disp);
+  /*imshow("disp0", disp);
   waitKey(1);*/
 }
 
