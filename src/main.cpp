@@ -21,10 +21,11 @@ int main(int argc, const char *argv[]) {
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
- /* Mat image_l_rected{shape3, CV_64FC1};
-  Mat image_r_rected{shape3, CV_64FC1};
+ /* Mat image_l_rected{shape2, CV_64FC1};
+  Mat image_r_rected{shape2, CV_64FC1};
  
   stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);*/
+
   Mat cost_l{shape3, CV_32FC1};
   Mat cost_r{shape3, CV_32FC1};
 
