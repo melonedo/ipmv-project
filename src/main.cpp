@@ -38,8 +38,8 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(cost_l, cost_out_l);
-  aggregate_cost(cost_r, cost_out_r);
+  aggregate_cost(image_l, cost_l, cost_out_l);
+  aggregate_cost(image_r, cost_r, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
@@ -50,7 +50,7 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  // imshow("result", disp_out);
+  imshow("result", disp_l);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   // imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));

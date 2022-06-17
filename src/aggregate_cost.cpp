@@ -1,7 +1,9 @@
 #include <math.h>
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "pipeline.hpp"
 
 using namespace cv;
@@ -51,19 +53,18 @@ void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out) {
                                                  : MaxDistance;
       for (d = 0; d <= Dmax; d++) {
         sum1 = sum2 = 0;
-        cost_center = cost_in.at<int32_t>(d, x, y);
+        cost_center = cost_in.at<float>(d, x, y);
         intensity_center = gray.at<uint8_t>(x, y);
         for (p = -aggsize; p <= aggsize; p++)
           for (q = -aggsize; q <= aggsize; q++) {
-            cost_neighbour = cost_in.at<int32_t>(d, x + p, y + q);
-            weight =
-                coefficient2[(int)abs(intensity_center -
-                                      image.at<int32_t>(d, x + p, y + q))] *
-                coefficient1[p + aggsize][q + aggsize];
+            cost_neighbour = cost_in.at<float>(d, x + p, y + q);
+            weight = coefficient2[(int)abs(intensity_center -
+                                           gray.at<uint8_t>(d, x + p, y + q))] *
+                     coefficient1[p + aggsize][q + aggsize];
             sum1 += weight;
             sum2 += weight * cost_neighbour;
           }
-        cost_out.at<int32_t>(d, x, y) = sum2 / sum1;
+        cost_out.at<float>(d, x, y) = sum2 / sum1;
       }
     }
 }
