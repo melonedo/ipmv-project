@@ -21,7 +21,6 @@ void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out) {
   size_t Row = cost_in.size[1];
   size_t Col = cost_in.size[2];
   size_t MaxDistance = cost_in.size[0];
-  // std::cout << Row << ' ' << Col << ' ' << MaxDistance << endl;
   cost_out = cost_in;
 
   Mat gray;
@@ -37,10 +36,13 @@ void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out) {
   for (int x = 0; x < 256; x++)
     coefficient2[x] = exp(-abs((float)x) / (2 * sigma2 * sigma2));
 
-  Mat temp(Row, Col, CV_32FC1);
 
-//#pragma omp parallel for
+#pragma omp parallel for
   for (int d = tau; d <= MaxDistance; d++) {
+#ifdef SHOW_AGGREGATION
+    namedWindow("test", WINDOW_NORMAL);
+    Mat temp(Row, Col, CV_32FC1, cost_out_ptr) / 1000;
+#endif
     for (int x = aggsize; x < Row - aggsize; x++)
       for (int y = aggsize; y < Col - aggsize; y++) {
         float sum1, sum2;
@@ -58,9 +60,16 @@ void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out) {
             sum2 += weight * cost_neighbour;
           }
         cost_out.at<float>(d, x, y) = sum2 / sum1;
+#ifdef SHOW_AGGREGATION
         temp.at<float>(x, y) = cost_out.at<float>(d, x, y);
+#endif
       }
-    imshow("1", temp);
-    waitKey(0);
+#ifdef SHOW_AGGREGATION
+    namedWindow("test", WINDOW_NORMAL);
+    putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
+            Scalar{1}, 5, 8, false);
+    imshow("test", temp);
+    waitKey(1);
+#endif
   }
 }
