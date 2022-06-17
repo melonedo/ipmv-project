@@ -16,6 +16,10 @@ int main(int argc, const char *argv[]) {
   Calib calib = read_calib(testset + "/calib.txt");
   Mat image_l = imread(testset + "/im0.png");
   Mat image_r = imread(testset + "/im1.png");
+  cv::resize(image_l, image_l, {960, 480});
+  cv::resize(image_r, image_r, {960, 480});
+  calib.height /= 2;
+  calib.width /= 2;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -49,9 +53,7 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  imshow("result", disp_l);
-  waitKey();
-  imshow("result", disp_r);
+  imshow("result", disp_out);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
