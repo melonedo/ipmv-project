@@ -28,9 +28,9 @@ int main(int argc, const char *argv[]) {
   Mat image_r_rected{shape2, CV_8UC3};
   
  
-  stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
+  /*stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);*/
 
-  /*Mat cost_l{shape3, CV_32FC1};
+  Mat cost_l{shape3, CV_32FC1};
   Mat cost_r{shape3, CV_32FC1};
 
   Mat cost_out_l{shape3, CV_32FC1};
@@ -80,7 +80,7 @@ int main(int argc, const char *argv[]) {
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   namedWindow("truth", WINDOW_NORMAL);
-  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));*/
+  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();
   return 0;

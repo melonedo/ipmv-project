@@ -24,7 +24,6 @@ void choose_disparity(const Mat& cost, Mat& disp) {
           max_value = cost_value;
           disp_value = k;
         }      
-        }
       }
       disp.at<uint8_t>(x, y) = disp_value;
     }
