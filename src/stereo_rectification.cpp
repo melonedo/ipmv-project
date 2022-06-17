@@ -23,6 +23,13 @@ using namespace std;
 //！！！如果你想把参数（内参矩阵、畸变系数向量、R，T）直接存在这个程序里，不用输入的话，用下面这段声明！！！
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image_l_rected, cv::Mat& image_r_rected) {                       
   
+   double d_left[1][5] = {1,1,1,1,1};
+   Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
+
+   double d_right[1][5] = {1,1,1,1,1};
+     
+   Mat D2 = cv::Mat(1, 5, cv::DataType<double>::type, d_right);
+    
   double K_left[3][3] = {662.3562273563088,
                          0,
                          312.6263091035918,
@@ -50,6 +57,11 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
   Vec3d T = {0.0676242, 0.0119106,0.0116169};
   
+   cv::Mat R_l, R_r, P1, P2, Q;
+   stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
+   cout << "module_l" << R_l << endl;
+   cout << "module_r" << R_r << endl;
+
 
   const size_t Row = img_L.size[0];//1080
   const size_t Col = img_L.size[1];//1920
@@ -86,13 +98,13 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
     
   //测试用代码
   //------------------------------------------------------------
-  
+  cout << "R1=" << R1 << endl;
+  cout << "R2=" << R2 << endl;
  /* cout << "I.cross(T1)" << I.cross(T1) << endl;
   cout << "E1=" << E1 << endl;
   cout << "E2=" << E2 << endl;
   cout << "E3=" << E3 << endl;
-  cout << "Rrect=" << Rrect << endl;
-  cout << "R2=" << R2 << endl;
+  
   cout << "Rrect * E1="<< Rrect * E1<<endl;*/
   
   int n = 0;
@@ -101,7 +113,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //------------------------------------------------------------
     
     
- #pragma omp parallel for
+  #pragma omp parallel for
   for (int x = 1 ; x < Row ; x++) {
     for (int y = 1 ; y < Col ; y++) {
       locat = {double(x), double(y), 1};
@@ -132,20 +144,34 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
       }*/
       /*n++;*/
       /*std::cout << "n=" << n << std::endl;*/
-      /*if (kl*locat_l[0] > max) {
-        max = kl*locat_l[0];
+      /*if (locat_l[2] > max) {
+        max = locat_l[2];
       }
-      if (kl * locat_l[0] < min) {
-        min = kl * locat_l[0];
+      if  (locat_l[2] < min) {
+        min = locat_l[2];
       }*/
-      /*std::cout << "N0." << n << ":" << locat_l[1] << std::endl;*/
-      /*std::cout << "N0." << n << ":" <<locat_l[0] << std::endl;*/
+      /*
+      x(1300 839018)
+      y(-168455 1238593)
+      z(-231 0)
+      */
+      /*std::cout << "N0." << n << ":" << locat_l[2] << std::endl;
+      std::cout << "N0." << n << ":" <<locat_l[2] << std::endl;*/
       //-----------------------------------------------------------------------
-      /*image_l_rected.at<double>(int(locat_l[0]), int(locat_l[1])) = img_L.at<uint8_t>(x, y);
-      image_r_rected.at<double>(int(locat_r[0]), int(locat_r[1])) = img_R.at<uint8_t>(x, y); */
-           //这里的赋值语句会导致溢出? 左右两边单独试的时候都不溢出的。                
+      for (int v = 0; v < 3; v++) {
+        image_l_rected.at<cv::Vec3b>(locat_l[0]/1000, locat_l[1]/1000)[v] = img_L.at<cv::Vec3b>(x, y)[v];//这里的abs（x,y/10000）只是用来暂时防止报错
+        image_r_rected.at<cv::Vec3b>(locat_r[0]/1000, locat_r[1]/1000)[v] = img_R.at<cv::Vec3b>(x, y)[v];//这里的赋值语句会导致溢出,原因已经查明，因为不是像素坐标，是毫米坐标的原因       
+          //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//测试代码
+          //image_r_rected.at<cv::Vec3b>(x, y)[v] = img_R.at<cv::Vec3b>(x, y)[v];
+                                     
+            
+      }
     }
+    
   }
+  namedWindow("image_l_rected", WINDOW_NORMAL);
+  imshow("image_l_rected", image_l_rected);
+  waitKey(0);
   /*std::cout << "max=" << max << std::endl;
   std::cout << "min=" << min << std::endl;*/
  //double K_left[3][3] = {662.3562273563088,
@@ -208,7 +234,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
 /*疑问：
     1.如果坐标的位置是double类型的话，会不会产生严重误差？我强转成int可以吗？
     2.之所以用double类型来存坐标矩阵，是因为在乘以R矩阵（double型）的时候矩阵类型不同会发生报错，只能把一个整数矩阵换成double的了
-    3.要给最后再给转换出来的坐标（[x' y' z']）乘以f/z'（出自你给的pdf P46）吗？我发现z'很小还为负数，乘上以后坐标变无穷大了
+    
     4.好像用T就可以得出Rrect，我没有没有用到你说的E^T*e=0什么的
 !!! 5.校正的时是彩色图片还是灰色图片？为此我的赋值语句怎样才能正确（数据类型先写double了，总之也先用灰色了）？
     6.可能还会有细节上的纰漏，我再查遍

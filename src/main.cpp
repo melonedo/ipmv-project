@@ -16,17 +16,23 @@ int main(int argc, const char *argv[]) {
   Calib calib = read_calib(testset + "/calib.txt");
   // calib.ndisp = 8; // 方便调试
   Mat image_l = imread(testset + "/im0.png");
-  Mat image_r = imread(testset + "/im1.png");
+  Mat image_r = imread(testset + "/im1.png");//CV_8U
+
+  /*std::cout << "channel" << image_l.channels() << std::endl;*/
+  /*std::cout << "Col" << image_l.size[1] << std::endl;*/
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
- /* Mat image_l_rected{shape2, CV_64FC1};
-  Mat image_r_rected{shape2, CV_64FC1};
- 
-  stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);*/
+  Mat image_l_rected{shape2, CV_8UC3};
+  Mat image_r_rected{shape2, CV_8UC3};
+  
+  /*image_l_rected = Mat(image_l.size(), image_l.type());
+  image_r_rected = Mat(image_r.size(), image_r.type());
+ */
+  stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
 
-  Mat cost_l{shape3, CV_32FC1};
+  /*Mat cost_l{shape3, CV_32FC1};
   Mat cost_r{shape3, CV_32FC1};
 
   Mat cost_out_l{shape3, CV_32FC1};
@@ -77,5 +83,5 @@ int main(int argc, const char *argv[]) {
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();
-  return 0;
+  return 0;*/
 }
