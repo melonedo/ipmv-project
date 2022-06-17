@@ -20,8 +20,8 @@ int main(int argc, const char *argv[]) {
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
-  Mat cost_l{shape3, CV_32FC1};
-  Mat cost_r{shape3, CV_32FC1};
+  Mat cost_l{shape3, CV_32FC1, {0.f}};
+  Mat cost_r{shape3, CV_32FC1, {0.f}};
 
   Mat cost_out_l{shape3, CV_32FC1};
   Mat cost_out_r{shape3, CV_32FC1};
@@ -38,8 +38,7 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(image_l, cost_l, cost_out_l);
-  aggregate_cost(image_r, cost_r, cost_out_r);
+  aggregate_cost(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
@@ -51,6 +50,8 @@ int main(int argc, const char *argv[]) {
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
   imshow("result", disp_l);
+  waitKey();
+  imshow("result", disp_r);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
