@@ -79,7 +79,6 @@ int main(int argc, const char *argv[]) {
   imshow("result", disp_l);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  namedWindow("truth", WINDOW_NORMAL);
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();
