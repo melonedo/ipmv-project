@@ -10,7 +10,7 @@ using namespace cv;
 using namespace std;
 
 #define rad 1
-#define aggsize 10
+#define aggsize 7
 #define sigma1 1.75
 #define sigma2 3.5
 
@@ -40,9 +40,8 @@ void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out_l, Mat& 
 #pragma omp parallel for
   for (int d = 0; d < MaxDistance; d++) {
     // Mat temp(Row, Col, CV_32FC1, {0.f});
-    int y_start = std::(aggsize, x);
-    for (int x = rad; x < Row - rad; x++) {
-      for (int y = rad; y < Col - rad; y++) {
+    for (int x = aggsize; x < Row - aggsize - 1; x++) {
+      for (int y = std::max(aggsize, d); y < Col - aggsize - 1; y++) {
         float sum1, sum2;
         sum1 = sum2 = 0;
         int intensity_center = gray.at<uint8_t>(x, y);

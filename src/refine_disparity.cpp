@@ -15,17 +15,19 @@ void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
   const size_t MaxDistance = cost.size[0];  // Maxdsitance=170
   const size_t Row = disp_l.size[0];
   const size_t Col = disp_l.size[1];
-  disp_out.setTo(Scalar::all(0));
   /*imshow("disp_out", disp_out);*/
   /*int n = 0;*/
   /*disp_out.setTo(Scalar::all(170));*/
 #pragma omp parallel for
-  for (int x = 1 + RAD; x < Row - 2 - RAD; x++) {
-    for (int y = 1 + RAD; y < Col - 2 - RAD; y++) {
+  for (int x = 0; x < Row; x++) {
+    for (int y = 0; y < Col; y++) {
       uint8_t dl = disp_l.at<uint8_t>(x, y);
+      if (y < dl) {
+        disp_out.at<uint8_t>(x, y) = 0;
+      }
       uint8_t dr = disp_r.at<uint8_t>(x, y - dl);
       if (abs(dl - dr) > threshold) {
-        disp_out.at<float>(x, y) = 0;
+        disp_out.at<uint8_t>(x, y) = 0;
       } else if (dl > 1 && dl < MaxDistance - 1){
         float cl = cost.at<float>((dl - 1), x, y);
         float cr = cost.at<float>((dl + 1), x, y);
@@ -33,6 +35,8 @@ void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
         if ((cm > cl) && (cm > cr)) {
           float d = (cl - cr) / (2 * cl + 2 * cr - 4 * cm) + dl;
           disp_out.at<uint8_t>(x, y) = d;
+        } else {
+          disp_out.at<uint8_t>(x, y) = cl;
         }
       }
     }
