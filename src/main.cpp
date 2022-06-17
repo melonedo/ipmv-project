@@ -53,7 +53,7 @@ int main(int argc, const char *argv[]) {
   imshow("result", disp_l);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  // imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
+  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();
   return 0;
