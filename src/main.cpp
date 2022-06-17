@@ -27,9 +27,7 @@ int main(int argc, const char *argv[]) {
   Mat image_l_rected{shape2, CV_8UC3};
   Mat image_r_rected{shape2, CV_8UC3};
   
-  /*image_l_rected = Mat(image_l.size(), image_l.type());
-  image_r_rected = Mat(image_r.size(), image_r.type());
- */
+ 
   stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
 
   /*Mat cost_l{shape3, CV_32FC1};
@@ -56,8 +54,8 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(cost_l, image_l, reference_l, cost_out_l);
-  aggregate_cost(cost_r, image_r, reference_r, cost_out_r);
+  aggregate_cost(image_l, cost_l, cost_out_l);
+  aggregate_cost(image_r, cost_r, cost_out_r);
  
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
@@ -80,8 +78,8 @@ int main(int argc, const char *argv[]) {
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   namedWindow("truth", WINDOW_NORMAL);
-  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
+  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));*/
 
   waitKey();
-  return 0;*/
+  return 0;
 }

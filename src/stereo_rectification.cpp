@@ -23,10 +23,10 @@ using namespace std;
 //！！！如果你想把参数（内参矩阵、畸变系数向量、R，T）直接存在这个程序里，不用输入的话，用下面这段声明！！！
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image_l_rected, cv::Mat& image_r_rected) {                       
   
-   double d_left[1][5] = {1,1,1,1,1};
+   double d_left[1][5] = {0,0,0,0,0};
    Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
 
-   double d_right[1][5] = {1,1,1,1,1};
+   double d_right[1][5] = {0,0,0,0,0};
      
    Mat D2 = cv::Mat(1, 5, cv::DataType<double>::type, d_right);
     
@@ -57,10 +57,10 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
   Vec3d T = {0.0676242, 0.0119106,0.0116169};
   
-   cv::Mat R_l, R_r, P1, P2, Q;
+  /*cv::Mat R_l, R_r, P1, P2, Q;
    stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
-   cout << "module_l" << R_l << endl;
-   cout << "module_r" << R_r << endl;
+   cout << "module_l" << P1 << endl;
+   cout << "module_r" << P2<< endl;*/
 
 
   const size_t Row = img_L.size[0];//1080
@@ -69,13 +69,14 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
  
   Matrix3d r; 
   Vector3d T1;
-  Matrix3d KL;
-  Matrix3d KR;
+  Matrix3d KL;//
+  Matrix3d KR;//
   cv2eigen(R,r);
   cv2eigen(T, T1);
   //---------------------------------------------
-  cv2eigen(K_R, KR);
   cv2eigen(K_L, KL);
+  cv2eigen(K_R, KR);
+  
   //----------------------------------
     
  
@@ -88,18 +89,42 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   Matrix<double, 3, 3> Rrect;
   temp << E1, E2, E3;
   Rrect = temp.transpose();
-  
-    
   Matrix<double, 3, 3> R1 = Rrect;
   Matrix<double, 3, 3> R2 = r*Rrect;
-  Vector3d locat;
+
+  Matrix<double, 3, 4> PL;
+  Matrix<double, 3, 4> PR;
+  Vector3d ZERO(0, 0, 0);
+  Matrix<double, 3, 4> M1_L;
+  Matrix<double, 3, 4> M1_R;
+  Matrix<double, 4, 4> M2;
+  Matrix<double, 3, 4> top;
+  Matrix<double, 1, 4> buttom(0,0,0,1);
+  
+  M1_L << KL, ZERO;
+  M1_R << KR,ZERO;
+  top << r, T1;
+  M2 << top,
+        buttom;
+  PL = M1_L * M2;
+  PR = M1_R * M2;
+  
+  cout << "KL=" << KL << endl;
+  cout << "KR=" << KR << endl;
+  cout << "M1_L=" << M1_L << endl;
+  cout << "M1_R=" << M1_R << endl;
+  cout << "M2=" << M2 << endl;
+  cout << "PL=" << PL << endl;
+  cout << "PR=" << PR << endl;
+
+  /*Vector3d locat;
   Vector3d locat_l;
-  Vector3d locat_r;
+  Vector3d locat_r;*/
     
   //测试用代码
   //------------------------------------------------------------
-  cout << "R1=" << R1 << endl;
-  cout << "R2=" << R2 << endl;
+  /*cout << "R1=" << R1 << endl;
+  cout << "R2=" << R2 << endl;*/
  /* cout << "I.cross(T1)" << I.cross(T1) << endl;
   cout << "E1=" << E1 << endl;
   cout << "E2=" << E2 << endl;
@@ -107,72 +132,87 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   
   cout << "Rrect * E1="<< Rrect * E1<<endl;*/
   
-  int n = 0;
-  int max=-200;
-  int min = 1300;
+  /*int n = 0;
+  int max=-1000;
+  int min = 2000;*/
+
+  
+  
   //------------------------------------------------------------
+    cv::Mat lmapx, lmapy, rmapx, rmapy;
+  cv::Mat r1, r2,p1,p2;
+  eigen2cv(R1, r1);
+  eigen2cv(R2, r2);
+  eigen2cv(PL, p1);
+  eigen2cv(PR, p2);
+  cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
+                              lmapy);
+  cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
+                              rmapy);
+  cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
+  cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
+  cv::imshow("left.jpg", image_l_rected);
+  cv::imshow("right.jpg", image_r_rected);
+  cv::waitKey(0);    
     
-    
-  #pragma omp parallel for
-  for (int x = 1 ; x < Row ; x++) {
-    for (int y = 1 ; y < Col ; y++) {
-      locat = {double(x), double(y), 1};
-      locat_l = KL * R1 * locat;
-      locat_r = KR * R2 * locat;
-      /*locat_l = R1 * locat;
-      locat_r = R2 * locat;*/
-      /*double kl = f / locat_l[2];
-      double kr = f / locat_r[2];*/
-      //或者
-      /*Vector3d HL = KL * R1 * locat_l;
-      Vector3d HR = KR * R2 * locat_r;*/
+  //#pragma omp parallel for
+  //for (int x = 1 ; x < Row ; x++) {
+  //  for (int y = 1 ; y < Col ; y++) {
+  //    locat = {double(x), double(y), 1};
+  //    locat_l = KL * R1  * KL.inverse()* locat;
+  //    locat_r = KR * R2  * KR.inverse()* locat;
+  //    /*locat_l = R1 * locat;
+  //    locat_r = R2 * locat;*/
+  //    /*double kl = f / locat_l[2];
+  //    double kr = f / locat_r[2];*/
+  //    //或者
+  //    /*Vector3d HL = KL * R1 * locat_l;
+  //    Vector3d HR = KR * R2 * locat_r;*/
 
 
-      //测试用代码
-      //------------------------------------------------------------
-      /*cout << " K_L * R1 " << K_L * R1 * locat_l<< endl;
-      cout << " K_R * R2 " << K_R * R2 * locat_r << endl;*/
-      /*Vector3d templ = K_L * R1 * locat_l ;
-      Vector3d tempr = K_R * R2 * locat_r;
-      
+  //    //测试用代码
+  //    //------------------------------------------------------------
+  //    /*cout << " K_L * R1 " << K_L * R1 * locat_l<< endl;
+  //    cout << " K_R * R2 " << K_R * R2 * locat_r << endl;*/
+  //    /*Vector3d templ = K_L * R1 * locat_l ;
+  //    Vector3d tempr = K_R * R2 * locat_r;
+  //    
 
-      if (templ[2] > max) {
-        max = templ[2];
-      }
-      if (templ[2] < min) {
-        min = templ[2];
-      }*/
-      /*n++;*/
-      /*std::cout << "n=" << n << std::endl;*/
-      /*if (locat_l[2] > max) {
-        max = locat_l[2];
-      }
-      if  (locat_l[2] < min) {
-        min = locat_l[2];
-      }*/
-      /*
-      x(1300 839018)
-      y(-168455 1238593)
-      z(-231 0)
-      */
-      /*std::cout << "N0." << n << ":" << locat_l[2] << std::endl;
-      std::cout << "N0." << n << ":" <<locat_l[2] << std::endl;*/
-      //-----------------------------------------------------------------------
-      for (int v = 0; v < 3; v++) {
-        image_l_rected.at<cv::Vec3b>(locat_l[0]/1000, locat_l[1]/1000)[v] = img_L.at<cv::Vec3b>(x, y)[v];//这里的abs（x,y/10000）只是用来暂时防止报错
-        image_r_rected.at<cv::Vec3b>(locat_r[0]/1000, locat_r[1]/1000)[v] = img_R.at<cv::Vec3b>(x, y)[v];//这里的赋值语句会导致溢出,原因已经查明，因为不是像素坐标，是毫米坐标的原因       
-          //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//测试代码
-          //image_r_rected.at<cv::Vec3b>(x, y)[v] = img_R.at<cv::Vec3b>(x, y)[v];
-                                     
-            
-      }
-    }
-    
-  }
-  namedWindow("image_l_rected", WINDOW_NORMAL);
-  imshow("image_l_rected", image_l_rected);
-  waitKey(0);
-  /*std::cout << "max=" << max << std::endl;
+  //    if (templ[2] > max) {
+  //      max = templ[2];
+  //    }
+  //    if (templ[2] < min) {
+  //      min = templ[2];
+  //    }*/
+  //    /*n++;*/
+  //    /*std::cout << "n=" << n << std::endl;*/
+  //    /*if (locat_l[1] > max) {
+  //      max = locat_l[1];
+  //    }
+  //    if  (locat_l[1] < min) {
+  //      min = locat_l[1];
+  //    }*/
+  //    /*
+  //    x(1300 839018)
+  //    y(-168455 1238593)
+  //    z(-231 0)
+  //    */
+  //    /*std::cout << "N0." << n << ":" << locat_l[2] << std::endl;
+  //    std::cout << "N0." << n << ":" <<locat_l[2] << std::endl;*/
+  //    //-----------------------------------------------------------------------
+  //    for (int v = 0; v < 3; v++) {
+  //      image_l_rected.at<cv::Vec3b>(locat_l[0]/2, locat_l[1]/2)[v] = img_L.at<cv::Vec3b>(x, y)[v];//这里的abs（x,y/10000）只是用来暂时防止报错
+  //      image_r_rected.at<cv::Vec3b>(locat_r[0]/2, locat_r[1]/2)[v] = img_R.at<cv::Vec3b>(x, y)[v];//这里的赋值语句会导致溢出,原因已经查明，因为不是像素坐标，是毫米坐标的原因       
+  //        //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//测试代码
+  //        //image_r_rected.at<cv::Vec3b>(x, y)[v] = img_R.at<cv::Vec3b>(x, y)[v];
+  //                                   
+  //          
+  //    }
+  //  }
+  //  
+  //}
+  
+ /* std::cout << "max=" << max << std::endl;
   std::cout << "min=" << min << std::endl;*/
  //double K_left[3][3] = {662.3562273563088,
  //                       0,
