@@ -57,6 +57,7 @@ int main(int argc, const char *argv[]) {
   aggregate_cost(image_l, cost_l, cost_out_l);
   aggregate_cost(image_r, cost_r, cost_out_r);
  
+
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
 
@@ -75,6 +76,7 @@ int main(int argc, const char *argv[]) {
   imshow("result_r", disp_r);
   imshow("result_out", disp_out);
  
+  imshow("result", disp_l);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
   namedWindow("truth", WINDOW_NORMAL);
