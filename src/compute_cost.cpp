@@ -92,6 +92,7 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
 
 #pragma omp parallel for
   for (int d = 0; d < MaxDistance; d++) {
+    Mat sum(Row, Col, CV_32SC1);
 #ifdef SHOW_DISPARITY
     Mat temp(Row, Col, CV_32FC1);
 #endif
@@ -165,7 +166,7 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
         }
       }
 #ifdef SHOW_DISPARITY
-      namedWindow("test", WINDOW_NORMAL);
+      // namedWindow("test", WINDOW_NORMAL);
       putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3, Scalar{1}, 5, 8, false);
       imshow("test", temp);
       waitKey(1);

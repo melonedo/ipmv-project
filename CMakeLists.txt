@@ -44,6 +44,7 @@ if(MSVC)
     target_compile_options(main PRIVATE
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>: /utf-8 >
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>: -Xcompiler=/utf-8>
+        $<$<BUILD_INTERFACE:$<CONFIG:Release,RelWithDebInfo>>: /Ob3>
     )
 endif()
 

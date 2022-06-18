@@ -10,7 +10,7 @@ void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
 
 void aggregate_cost(const cv::Mat& image, const cv::Mat& cost_in,
-                    cv::Mat& cost_out);
+                    cv::Mat& cost_out_l, cv::Mat& cost_out_r);
 
 void choose_disparity(const cv::Mat& cost, cv::Mat& disp);
 

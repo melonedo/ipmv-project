@@ -16,10 +16,11 @@ int main(int argc, const char *argv[]) {
   Calib calib = read_calib(testset + "/calib.txt");
   // calib.ndisp = 8; // 方便调试
   Mat image_l = imread(testset + "/im0.png");
-  Mat image_r = imread(testset + "/im1.png");//CV_8U
-
-  /*std::cout << "channel" << image_l.channels() << std::endl;*/
-  /*std::cout << "Col" << image_l.size[1] << std::endl;*/
+  Mat image_r = imread(testset + "/im1.png");
+  cv::resize(image_l, image_l, {960, 480});
+  cv::resize(image_r, image_r, {960, 480});
+  calib.height /= 2;
+  calib.width /= 2;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -30,8 +31,9 @@ int main(int argc, const char *argv[]) {
  
   /*stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);*/
 
-  Mat cost_l{shape3, CV_32FC1};
-  Mat cost_r{shape3, CV_32FC1};
+  
+  Mat cost_l{shape3, CV_32FC1, {0.f}};
+  Mat cost_r{shape3, CV_32FC1, {0.f}};
 
   Mat cost_out_l{shape3, CV_32FC1};
   Mat cost_out_r{shape3, CV_32FC1};
@@ -54,9 +56,7 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(image_l, cost_l, cost_out_l);
-  aggregate_cost(image_r, cost_r, cost_out_r);
- 
+  aggregate_cost(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
