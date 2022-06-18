@@ -11,16 +11,19 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/ladder1";
+  std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
 
   Calib calib = read_calib(testset + "/calib.txt");
   // calib.ndisp = 8;  // 方便调试
-  Mat image_l = imread(testset + "/im0.png");
-  Mat image_r = imread(testset + "/im1.png");
+  /*Mat image_l = imread(testset + "/im0.png");
+  Mat image_r = imread(testset + "/im1.png");*/
+  Mat image_l = imread("E:/ipmv-project/data/left/1.jpg");
+  Mat image_r = imread("E:/ipmv-project/data/right/1.jpg");//注意该位置
   // cv::resize(image_l, image_l, {960, 540});
   // cv::resize(image_r, image_r, {960, 540});
   calib.height = image_l.rows;
   calib.width = image_l.cols;
+  calib.ndisp = 100;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -61,6 +64,8 @@ int main(int argc, const char *argv[]) {
   t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
+
+  imshow("disp_l", disp_l*255);
 
   imshow("result", disp_out / calib.vmax);
 

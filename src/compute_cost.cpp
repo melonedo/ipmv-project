@@ -8,7 +8,7 @@ using namespace cv;
 using namespace std;
 
 
-// #define SHOW_DISPARITY
+#define SHOW_DISPARITY
 
 void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
                   Mat& cost_R) {

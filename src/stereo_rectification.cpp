@@ -117,25 +117,11 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   cout << "PL=" << PL << endl;
   cout << "PR=" << PR << endl;
 
-  /*Vector3d locat;
-  Vector3d locat_l;
-  Vector3d locat_r;*/
     
   //测试用代码
   //------------------------------------------------------------
-  /*cout << "R1=" << R1 << endl;
-  cout << "R2=" << R2 << endl;*/
- /* cout << "I.cross(T1)" << I.cross(T1) << endl;
-  cout << "E1=" << E1 << endl;
-  cout << "E2=" << E2 << endl;
-  cout << "E3=" << E3 << endl;
-  
-  cout << "Rrect * E1="<< Rrect * E1<<endl;*/
-  
-  /*int n = 0;
-  int max=-1000;
-  int min = 2000;*/
 
+  
   
   
   //------------------------------------------------------------
@@ -172,6 +158,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
 
   //    //测试用代码
   //    //------------------------------------------------------------
+  
   //    /*cout << " K_L * R1 " << K_L * R1 * locat_l<< endl;
   //    cout << " K_R * R2 " << K_R * R2 * locat_r << endl;*/
   //    /*Vector3d templ = K_L * R1 * locat_l ;

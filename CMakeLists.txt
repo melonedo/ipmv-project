@@ -23,7 +23,6 @@ add_executable(main
     src/refine_disparity.cpp
     src/construct_graph.cpp
     src/stereo_rectification.cpp
-)
     src/segment_tree.cpp
     )
 
