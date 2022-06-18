@@ -31,10 +31,10 @@ uint8_t get_edge_weight(Edge edge) { return edge.weight; }
 
 class DisjointSet {
  public:
-  DisjointSet(uint32_t size) : parent(size), max_weight(size) {
+  DisjointSet(uint32_t size)
+      : parent(size), max_weight(size, 0), node_num(size, 1) {
     for (uint32_t i = 0; i < size; i++) {
       parent[i] = i;
-      max_weight[i] = 0;
     }
   }
 
@@ -52,23 +52,29 @@ class DisjointSet {
     // j所在树成为i所在树的子树
     parent[parent_j] = parent_i;
     max_weight[parent_i] = std::max(max_weight[parent_i], max_weight[parent_j]);
+    node_num[parent_i] = node_num[parent_i] + node_num[parent_j];
   }
 
   uint8_t get_max_weight(uint32_t i) const { return max_weight[find(i)]; }
+
+  uint32_t get_node_num(uint32_t i) const { return node_num[find(i)]; }
 
   bool disjoint(uint32_t i, uint32_t j) const { return find(i) != find(j); }
 
  private:
   mutable std::vector<uint32_t> parent;
   std::vector<uint8_t> max_weight;
+  std::vector<uint32_t> node_num;
 };
 
 bool merge_criterion(const DisjointSet& set, uint32_t p1, uint32_t p2,
                      uint8_t weight) {
   float w1 = set.get_max_weight(p1);
   float w2 = set.get_max_weight(p2);
+  float n1 = set.get_node_num(p1);
+  float n2 = set.get_node_num(p2);
   static_assert(std::numeric_limits<double>::is_iec559, "Expect K/0 == +Inf");
-  return weight <= w1 + K / w1 && weight <= w2 + K / w2;
+  return weight <= w1 + K / n1 && weight <= w2 + K / n2;
 }
 
 uint8_t calculate_weight(Vec3b l, Vec3b r) {
@@ -76,7 +82,8 @@ uint8_t calculate_weight(Vec3b l, Vec3b r) {
       {std::abs(l[0] - r[0]), std::abs(l[1] - r[1]), std::abs(l[2] - r[2])});
 }
 
-#define sigma (.3f * 255)
+// 仅用于在showtree中展示
+#define sigma (1.f * 255)
 
 void show_tree(const Mat_<Vec3b>& image_, const Mat_<uint8_t>& graph_) {
   float coef[256];
@@ -132,9 +139,9 @@ void show_tree(const Mat_<Vec3b>& image_, const Mat_<uint8_t>& graph_) {
     }
   }
   namedWindow("test", WINDOW_NORMAL);
-  Mat gray, res;
-  cvtColor(image_, gray, CV_BGR2GRAY);
-  multiply(gray, temp, res, 5, CV_8UC1);
+  Mat temp3, res;
+  cvtColor(temp + .03, temp3, COLOR_GRAY2BGR);
+  multiply(image_, temp3, res, 1.f / 30, CV_32FC3);
   imshow("test", res);
   waitKey(0);
 }
@@ -161,8 +168,8 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
     }
   }
 
-//   std::shuffle(edges.begin(), edges.end(),
-//                       std::mt19937{std::random_device{}()});
+  //   std::shuffle(edges.begin(), edges.end(),
+  //                       std::mt19937{std::random_device{}()});
 
   std::sort(
       std::execution::par_unseq, edges.begin(), edges.end(),
@@ -175,16 +182,19 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
   // 并查集
   DisjointSet set(Row * Col);
 
-  std::vector<bool> visited(2 * Row * Col, false);
+  // std::vector<bool> visited(2 * Row * Col, false);
   uint32_t count = 0;
 
+  // 按照Segment Tree写但实际上是最小生成树，因为比Segment Tree表现要好。
   // 连接片段
-  for (int i = 0; i < edges.size(); i++) {
+  for (int i = 0; i < edges.size() &&
+                  count != (Row - 2 - 2 * RAD) * (Col - 2 - 2 * RAD) - 1;
+       i++) {
     Edge e = edges[i];
     uint32_t p1, p2;
     get_points(e, Col, p1, p2);
     uint8_t w = get_edge_weight(e);
-    if (set.disjoint(p1, p2) && merge_criterion(set, p1, p2, w)) {
+    if (set.disjoint(p1, p2)) {
       set.join(p1, p2, w);
       if (e.direction) {
         graph.at<uint8_t>(p1) |= 1 << 1;
@@ -193,30 +203,30 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
         graph.at<uint8_t>(p1) |= 1 << 0;
         graph.at<uint8_t>(p2) |= 1 << 2;
       }
-      visited[i] = true;
+      // visited[i] = true;
       count++;
     }
   }
   // 构成全连接
-  for (int i = 0; i < edges.size() &&
-                  count != (Row - 2 - 2 * RAD) * (Col - 2 - 2 * RAD) - 1;
-       i++) {
-    if (visited[i]) continue;
-    Edge e = edges[i];
-    uint32_t p1, p2;
-    get_points(e, Col, p1, p2);
-    if (set.disjoint(p1, p2)) {
-      set.join(p1, p2, get_edge_weight(e));
-      if (e.direction) {
-        graph.at<uint8_t>(p1) |= 1 << 1;
-        graph.at<uint8_t>(p2) |= 1 << 3;
-      } else {
-        graph.at<uint8_t>(p1) |= 1 << 0;
-        graph.at<uint8_t>(p2) |= 1 << 2;
-      }
-      count++;
-    }
-  }
+  // for (int i = 0; i < edges.size() &&
+  //                 count != (Row - 2 - 2 * RAD) * (Col - 2 - 2 * RAD) - 1;
+  //      i++) {
+  //   if (visited[i]) continue;
+  //   Edge e = edges[i];
+  //   uint32_t p1, p2;
+  //   get_points(e, Col, p1, p2);
+  //   if (set.disjoint(p1, p2)) {
+  //     set.join(p1, p2, get_edge_weight(e));
+  //     if (e.direction) {
+  //       graph.at<uint8_t>(p1) |= 1 << 1;
+  //       graph.at<uint8_t>(p2) |= 1 << 3;
+  //     } else {
+  //       graph.at<uint8_t>(p1) |= 1 << 0;
+  //       graph.at<uint8_t>(p2) |= 1 << 2;
+  //     }
+  //     count++;
+  //   }
+  // }
   assert(count == (Row - 2 - 2 * RAD) * (Col - 2 - 2 * RAD) - 1);
 
   // 算法需要确定唯一的父节点
@@ -261,6 +271,6 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
     }
   }
 
-//   show_tree(reinterpret_cast<const Mat3b&>(image),
-//             reinterpret_cast<const Mat1b&>(graph));
+  //   show_tree(reinterpret_cast<const Mat3b&>(image),
+  //             reinterpret_cast<const Mat1b&>(graph));
 }

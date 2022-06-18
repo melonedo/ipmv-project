@@ -13,9 +13,9 @@ using namespace cv;
 uint8_t calculate_weight(Vec3b l, Vec3b r);
 
 // cost_rec = current_cost + weighted sum of cost_rec of its direct chidren
-void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
-                      const Mat_<uint8_t>& graph_, const float coef[256],
-                      Mat_<float>& cost_rec_) {
+NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
+                              const Mat_<uint8_t>& graph_,
+                              const float coef[256], Mat_<float>& cost_rec_) {
   const size_t Col = image_.size[1];
   struct State {
     float cost_rec;
@@ -32,6 +32,7 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
     State& top = stack.top();
     switch (top.num) {
       case 0:
+        assert(!isnan(top.cost_rec));
         if (top.node & (1 << 0) &&
             ((top.node >> 4) != 0 || top.pos == GRAPH_ROOT)) {
           uint32_t i = top.pos + 1;
@@ -43,6 +44,7 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 1:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos + 1))];
+        assert(!isnan(top.cost_rec));
       L1:
         if (top.node & (1 << 1) && (top.node >> 4) != 1) {
           uint32_t i = top.pos + Col;
@@ -54,6 +56,7 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 2:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos + Col))];
+        assert(!isnan(top.cost_rec));
       L2:
         if (top.node & (1 << 2) && (top.node >> 4) != 2) {
           uint32_t i = top.pos - 1;
@@ -65,6 +68,7 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 3:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos - 1))];
+        assert(!isnan(top.cost_rec));
       L3:
         if (top.node & (1 << 3) && (top.node >> 4) != 3) {
           uint32_t i = top.pos - Col;
@@ -76,8 +80,10 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 4:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos - Col))];
+        assert(!isnan(top.cost_rec));
       L4:
         cost_rec_(top.pos) = ret = top.cost_rec;
+        assert(!isnan(ret));
         stack.pop();
         break;
 
@@ -103,9 +109,10 @@ void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
 
 // cost_d(p) = S * cost_d(parent) + (1 - S^2) * cost_rec(p)
 // S = exp(-edge_weight / sigma)
-void compute_cost_d(const float* cost_in, const Mat_<Vec3b>& image_,
-                    const Mat_<uint8_t>& graph_, const Mat_<float>& cost_rec_,
-                    const float coef[256], float* cost_out) {
+NOALIAS void compute_cost_d(const float* cost_in, const Mat_<Vec3b>& image_,
+                            const Mat_<uint8_t>& graph_,
+                            const Mat_<float>& cost_rec_, const float coef[256],
+                            float* cost_out) {
   const size_t Col = image_.size[1];
   std::stack<uint32_t> stack;
   stack.push(GRAPH_ROOT);
@@ -155,8 +162,8 @@ void compute_cost_d(const float* cost_in, const Mat_<Vec3b>& image_,
   }
 }
 
-void aggregate_cost(const Mat& cost_in, const Mat& image, const Mat& graph,
-                    Mat& cost_out) {
+NOALIAS void aggregate_cost(const Mat& cost_in, const Mat& image,
+                            const Mat& graph, Mat& cost_out) {
   const size_t MaxDistance = cost_in.size[0];
   const size_t Row = cost_in.size[1];
   const size_t Col = cost_in.size[2];
@@ -186,7 +193,7 @@ void aggregate_cost(const Mat& cost_in, const Mat& image, const Mat& graph,
     Mat temp = Mat(Row, Col, CV_32FC1, const_cast<float*>(cost_out_ptr)) / 1000;
     using namespace std::string_literals;
     putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
-            Scalar{1}, 5, 8, false);
+            Scalar{.5}, 5, 8, false);
     imshow("test", temp);
     waitKey(1);
 #endif

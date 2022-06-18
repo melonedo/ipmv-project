@@ -1,17 +1,18 @@
 #include <math.h>
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "pipeline.hpp"
 
 using namespace cv;
 using namespace std;
 
+// #define SHOW_DISPARITY
 
-#define SHOW_DISPARITY
-
-void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
-                  Mat& cost_R) {
+NOALIAS void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
+                          Mat& cost_R) {
   const size_t Row = image_L.size[0];
   const size_t Col = image_L.size[1];
   const size_t MaxDistance = cost_L.size[0];
@@ -20,7 +21,6 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
   Mat sum_R(Row, Col, CV_32SC1);
   Mat sqr_sum_L(Row, Col, CV_32SC1);
   Mat sqr_sum_R(Row, Col, CV_32SC1);
-
 
   Mat gray_L, gray_R;
   cvtColor(image_L, gray_L, CV_BGR2GRAY);
@@ -117,6 +117,9 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
 
     for (int x = 1 + RAD; x < Row - 1 - RAD; x++)
       for (int y = d + 1 + RAD; y < Col - 1 - RAD; y++) {
+        if (x == 704 && y == 374) {
+          int a = 1;
+        }
         //左图区块
         int xMax_L = x + RAD;
         int xMin_L = x - RAD;
@@ -131,46 +134,51 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
         int pixels = (2 * RAD + 1) * (2 * RAD + 1);
         //左图像素强度和标准差
         float I_L = sum_L.at<int32_t>(xMax_L, yMax_L) -
-              sum_L.at<int32_t>(xMin_L - 1, yMax_L) -
-              sum_L.at<int32_t>(xMax_L, yMin_L - 1) +
-              sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
+                    sum_L.at<int32_t>(xMin_L - 1, yMax_L) -
+                    sum_L.at<int32_t>(xMax_L, yMin_L - 1) +
+                    sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
         float var_L = sqr_sum_L.at<int32_t>(xMax_L, yMax_L) -
-                sqr_sum_L.at<int32_t>(xMin_L - 1, yMax_L) -
-                sqr_sum_L.at<int32_t>(xMax_L, yMin_L - 1) +
-                sqr_sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
-        var_L = sqrt(var_L - I_L * I_L / (float)pixels);
+                      sqr_sum_L.at<int32_t>(xMin_L - 1, yMax_L) -
+                      sqr_sum_L.at<int32_t>(xMax_L, yMin_L - 1) +
+                      sqr_sum_L.at<int32_t>(xMin_L - 1, yMin_L - 1);
+        if (var_L - I_L * I_L / (float)pixels >= 0)
+          var_L = sqrt(var_L - I_L * I_L / (float)pixels);
+        else
+          var_L = 0;
         I_L /= (float)pixels;
         //右图像素强度和标准差
         float I_R = sum_R.at<int32_t>(xMax_R, yMax_R) -
-              sum_R.at<int32_t>(xMin_R - 1, yMax_R) -
-              sum_R.at<int32_t>(xMax_R, yMin_R - 1) +
-              sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
+                    sum_R.at<int32_t>(xMin_R - 1, yMax_R) -
+                    sum_R.at<int32_t>(xMax_R, yMin_R - 1) +
+                    sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
         float var_R = sqr_sum_R.at<int32_t>(xMax_R, yMax_R) -
-                sqr_sum_R.at<int32_t>(xMin_R - 1, yMax_R) -
-                sqr_sum_R.at<int32_t>(xMax_R, yMin_R - 1) +
-                sqr_sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
-        var_R = sqrt(var_R - I_R * I_R / (float)pixels);
+                      sqr_sum_R.at<int32_t>(xMin_R - 1, yMax_R) -
+                      sqr_sum_R.at<int32_t>(xMax_R, yMin_R - 1) +
+                      sqr_sum_R.at<int32_t>(xMin_R - 1, yMin_R - 1);
+        if (var_R - I_R * I_R / (float)pixels > 0)
+          var_R = sqrt(var_R - I_R * I_R / (float)pixels);
+        else
+          var_R = 0;
         I_R /= (float)pixels;
         //左右图对比
         float sum_LR = sum.at<int32_t>(xMax_L, yMax_L) -
-                 sum.at<int32_t>(xMin_L - 1, yMax_L) -
-                 sum.at<int32_t>(xMax_L, yMin_L - 1) +
-                 sum.at<int32_t>(xMin_L - 1, yMin_L - 1);
+                       sum.at<int32_t>(xMin_L - 1, yMax_L) -
+                       sum.at<int32_t>(xMax_L, yMin_L - 1) +
+                       sum.at<int32_t>(xMin_L - 1, yMin_L - 1);
         if (var_L * var_R != 0) {
-          cost_L.at<float>(d, x, y) =
+          cost_L.at<float>(d, x, y) = cost_R.at<float>(d, x, y - d) =
               (sum_LR - (float)pixels * I_L * I_R) / (var_L * var_R);
-          cost_R.at<float>(d, x, y - d) =
-              (sum_LR - (float)pixels * I_L * I_R) / (var_L * var_R);
-#ifdef SHOW_DISPARITY
-          temp.at<float>(x, y) = cost_L.at<float>(d, x, y);
-#endif
         }
+#ifdef SHOW_DISPARITY
+        temp.at<float>(x, y) = cost_L.at<float>(d, x, y);
+#endif
       }
 #ifdef SHOW_DISPARITY
-      // namedWindow("test", WINDOW_NORMAL);
-      putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3, Scalar{1}, 5, 8, false);
-      imshow("test", temp);
-      waitKey(1);
+    // namedWindow("test", WINDOW_NORMAL);
+    putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
+            Scalar{1}, 5, 8, false);
+    imshow("test", temp);
+    waitKey(1);
 #endif
   }
 }

@@ -2,9 +2,14 @@
 
 #include <opencv2/opencv.hpp>
 
-#define RAD 2
+// #define NOALIAS __declspec(noalias)
+#ifndef NOALIAS
+#define NOALIAS
+#endif
 
-#define GRAPH_ROOT 20000
+#define RAD 8
+
+#define GRAPH_ROOT 86510
 
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
