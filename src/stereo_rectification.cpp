@@ -25,7 +25,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   
 
     //�������
- /* double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336, -0.007308380442553203, 0.01834444017828064, -0.1575561255791122};
+ double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336, -0.007308380442553203, 0.01834444017828064, -0.1575561255791122};
    Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
 
    double d_right[1][5] = {-0.3123616831963305, 0.7492919242979774, -0.005600943091007264, 0.01601327051434557, -2.391415265128237};
@@ -48,10 +48,10 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
  0.00895929610170791, -0.009563127049233127, 0.9999141351208124
 };
   Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
-  Vec3d T = {-65.0649, -0.139223, 27.6227};*/
+  Vec3d T = {-65.0649, -0.139223, 27.6227};
 
     //matlab����
-  double d_left[1][5] = {-0.485164739871447,0.552024900666525,0,0,-0.336674278642270};                         
+  /*double d_left[1][5] = {-0.485164739871447,0.552024900666525,0,0,-0.336674278642270};                         
   Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
   double d_right[1][5] = {-0.424674246902221, 0.00151675029453053, 0 ,0, 0.639005725201348};
   Mat D2 = cv::Mat(1, 5, cv::DataType<double>::type, d_right);
@@ -66,7 +66,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   double R_stereo[3][3] = {
       0.999971235342412,-0.00173830599783834,0.00738287071727767,0.00167481635173865,0.999961641851747,0.00859708179243690,-0.00739753188287186,- 0.00858446954772283,0.999935789640828};   
   Mat R = cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
-  Vec3d T = {-61.7483197328276,3.73154432852811,1.76558076147146};
+  Vec3d T = {-61.7483197328276,3.73154432852811,1.76558076147146};*/
   
   //用cv自带函数进行校正，对照组
   
@@ -76,7 +76,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   const size_t Col = img_L.size[1];//1920
     
   //Mat R, E, F;
-  //vector<Mat> tvecsMat; /* 每幅图像的旋转向量 */
+  //vector<Mat> tvecsMat; /* 每幅图像的旋转向�?*/
   //vector<Mat> rvecsMat;      
   //Mat K_L ;
   //Mat K_R ;
@@ -188,7 +188,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
                               rmapy);*/
-  //对照组程序
+  //对照组程�?
   cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
@@ -201,7 +201,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
     
  
 
-  //    //测试用代码
+  //    //测试用代�?
   //    //------------------------------------------------------------
   
 
@@ -215,7 +215,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //    locat_r = R2 * locat;*/
   //    /*double kl = f / locat_l[2];
   //    double kr = f / locat_r[2];*/
-  //    //或者
+  //    //或�?
   //    /*Vector3d HL = KL * R1 * locat_l;
   //    Vector3d HR = KR * R2 * locat_r;*/
 
@@ -249,7 +249,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //    std::cout << "N0." << n << ":" <<locat_l[2] << std::endl;*/
   //    //-----------------------------------------------------------------------
   //    for (int v = 0; v < 3; v++) {
-  //      image_l_rected.at<cv::Vec3b>(locat_l[0]/2, locat_l[1]/2)[v] = img_L.at<cv::Vec3b>(x, y)[v];//这里的abs（x,y/10000）只是用来暂时防止报错
+  //      image_l_rected.at<cv::Vec3b>(locat_l[0]/2, locat_l[1]/2)[v] = img_L.at<cv::Vec3b>(x, y)[v];//这里的abs（x,y/10000）只是用来暂时防止报�?
   //      image_r_rected.at<cv::Vec3b>(locat_r[0]/2, locat_r[1]/2)[v] = img_R.at<cv::Vec3b>(x, y)[v];//这里的赋值语句会导致溢出,原因已经查明，因为不是像素坐标，是毫米坐标的原因       
   //        //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//测试代码
   //        //image_r_rected.at<cv::Vec3b>(x, y)[v] = img_R.at<cv::Vec3b>(x, y)[v];
@@ -260,73 +260,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //  
   //}
   
- /* std::cout << "max=" << max << std::endl;
-  std::cout << "min=" << min << std::endl;*/
- //double K_left[3][3] = {662.3562273563088,
- //                       0,
- //                       312.6263091035918,
- //                       0,
- //                       662.9296902690498,
- //                       258.9996285827844,
- //                       0,
- //                       0,
- //                       1};
- //Mat K1 = cv::Mat(3, 3, cv::DataType<double>::type, K_left);
-
- //double d_left[1][5] = {0.06966962838870275, 0.02054263655123773,
- //                       0.001252584212211826, 0.002089077085379777,
- //                       -0.4096320330693385};
- //Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
-
- //double K_right[3][3] = {647.3402626821477,
- //                        0,
- //                        298.8766921846282,
- //                        0,
- //                        647.739941990085,
- //                        259.9519313557778,
- //                        0,
- //                        0,
- //                        1};
- //Mat K2 = cv::Mat(3, 3, cv::DataType<double>::type, K_right);
-
- //double d_right[1][5] = {0.02272045036297292, -0.5565235313790773,
- //                        0.007380600944678045, -0.007607934580409265,
- //                        1.30443069011335};
- //Mat D2 = cv::Mat(1, 5, cv::DataType<double>::type, d_right);
-
- //double R_stereo[3][3] = {
- //    0.9997826605620699,    0.004051019540949904,  0.02045044938645102,
- //    -0.004074743115292153, 0.999991072656389,     0.001118515117933302,
- //    -0.02044573569166274,  -0.001201602348328341, 0.9997902420227071};
- //Mat R = cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
-
- //Vec3d T = {-0.0676242, -0.0119106, -0.0116169};
-
-
- //// 进一步进行双目校正，这里stereoRectify函数必须接受double类型的Mat，否则会报错：
- //// -205:Formats of input arguments do not match) All the matrices must have the
- //// same data type in function 'cvRodrigues2'
- //cv::Mat R1, R2, P1, P2, Q;
- //stereoRectify(K1, D1, K2, D2, img_L.size(), R, T, R1, R2, P1, P2, Q);
-
- //cout << "进一步双目校正结果：" << endl << endl;
- //cout << R1 << endl;
- //cout << P1 << endl;
- //cout << R2 << endl;
- //cout << P2 << endl;
- //
+ 
 } 
 
   
-
-/*疑问：
-    1.如果坐标的位置是double类型的话，会不会产生严重误差？我强转成int可以吗？
-    2.之所以用double类型来存坐标矩阵，是因为在乘以R矩阵（double型）的时候矩阵类型不同会发生报错，只能把一个整数矩阵换成double的了
-    
-    4.好像用T就可以得出Rrect，我没有没有用到你说的E^T*e=0什么的
-!!! 5.校正的时是彩色图片还是灰色图片？为此我的赋值语句怎样才能正确（数据类型先写double了，总之也先用灰色了）？
-    6.可能还会有细节上的纰漏，我再查遍
-*/
-
-//Mat image_l = imread(testset + "/im0.png");
-//Mat image_r = imread(testset + "/im1.png");
