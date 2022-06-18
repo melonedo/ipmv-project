@@ -7,7 +7,7 @@
 #define NOALIAS
 #endif
 
-#define RAD 2
+#define RAD 8
 
 #define GRAPH_ROOT 86510
 

@@ -193,7 +193,7 @@ NOALIAS void aggregate_cost(const Mat& cost_in, const Mat& image,
     Mat temp = Mat(Row, Col, CV_32FC1, const_cast<float*>(cost_out_ptr)) / 1000;
     using namespace std::string_literals;
     putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
-            Scalar{1}, 5, 8, false);
+            Scalar{.5}, 5, 8, false);
     imshow("test", temp);
     waitKey(1);
 #endif

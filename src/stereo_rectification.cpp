@@ -19,8 +19,8 @@ using namespace std;
   //                        const cv::Mat& KL,const cv::Mat& KR,
   //                        const cv::Mat& DL, const cv::Mat& DR,
   //                        const cv::Mat& R,const cv::Mat& T,
-  //                        cv::Mat& image_l_rected,cv::Mat& image_r_rected) {////Á½ÕÅÔ­Í¼£¬ÄÚ²Î¾ØÕóK(Ë«Ä¿±ê¶¨»ñµÃ)£¬»û±äÏµÊıÏòÁ¿D£¬R¡¢T£¬×îºóÁ½¸öÊÇÊä³ö
-//£¡£¡£¡Èç¹ûÄãÏë°Ñ²ÎÊı£¨ÄÚ²Î¾ØÕó¡¢»û±äÏµÊıÏòÁ¿¡¢R£¬T£©Ö±½Ó´æÔÚÕâ¸ö³ÌĞòÀï£¬²»ÓÃÊäÈëµÄ»°£¬ÓÃÏÂÃæÕâ¶ÎÉùÃ÷£¡£¡£¡
+  //                        cv::Mat& image_l_rected,cv::Mat& image_r_rected) {////ä¸¤å¼ åŸå›¾ï¼Œå†…å‚çŸ©é˜µK(åŒç›®æ ‡å®šè·å¾—)ï¼Œç•¸å˜ç³»æ•°å‘é‡Dï¼ŒRã€Tï¼Œæœ€åä¸¤ä¸ªæ˜¯è¾“å‡º
+//ï¼ï¼ï¼å¦‚æœä½ æƒ³æŠŠå‚æ•°ï¼ˆå†…å‚çŸ©é˜µã€ç•¸å˜ç³»æ•°å‘é‡ã€Rï¼ŒTï¼‰ç›´æ¥å­˜åœ¨è¿™ä¸ªç¨‹åºé‡Œï¼Œä¸ç”¨è¾“å…¥çš„è¯ï¼Œç”¨ä¸‹é¢è¿™æ®µå£°æ˜ï¼ï¼ï¼
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image_l_rected, cv::Mat& image_r_rected) {                       
   
   double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336, -0.007308380442553203, 0.01834444017828064, -0.1575561255791122};
@@ -48,7 +48,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
   Vec3d T = {-65.0649, -0.139223, 27.6227};
   
-  //ÓÃcv×Ô´øº¯Êı½øĞĞĞ£Õı£¬¶ÔÕÕ×é
+  //ç”¨cvè‡ªå¸¦å‡½æ•°è¿›è¡Œæ ¡æ­£ï¼Œå¯¹ç…§ç»„
   
    
    
@@ -56,7 +56,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   const size_t Col = img_L.size[1];//1920
     
   //Mat R, E, F;
-  //vector<Mat> tvecsMat; /* Ã¿·ùÍ¼ÏñµÄĞı×ªÏòÁ¿ */
+  //vector<Mat> tvecsMat; /* æ¯å¹…å›¾åƒçš„æ—‹è½¬å‘é‡ */
   //vector<Mat> rvecsMat;      
   //Mat K_L ;
   //Mat K_R ;
@@ -66,7 +66,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
 
   //vector<cv::Point3f> objectpoint;
   //vector<vector<cv::Point3f>> objpoint;
-  //// image_points1¡¢imagePoints2ÖĞÃ¿¸öÔªËØ¶¼ÊÇÒ»¸öĞ¡vector£¬Ã¿¸öĞ¡vector´æ´¢µÄÃ¿¸öÔªËØ¶¼ÊÇopencvµÄcv::Point2fÊı¾İ½á¹¹
+  //// image_points1ã€imagePoints2ä¸­æ¯ä¸ªå…ƒç´ éƒ½æ˜¯ä¸€ä¸ªå°vectorï¼Œæ¯ä¸ªå°vectorå­˜å‚¨çš„æ¯ä¸ªå…ƒç´ éƒ½æ˜¯opencvçš„cv::Point2fæ•°æ®ç»“æ„
   //vector<vector<Point2f> > imagePoints1, imagePoints2;
   //vector<Point2f> corner_L, corner_R;
 
@@ -168,7 +168,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
                               rmapy);*/
-  //¶ÔÕÕ×é³ÌĞò
+  //å¯¹ç…§ç»„ç¨‹åº
   cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
@@ -181,7 +181,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
     
  
 
-  //    //²âÊÔÓÃ´úÂë
+  //    //æµ‹è¯•ç”¨ä»£ç 
   //    //------------------------------------------------------------
   
 
@@ -195,7 +195,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //    locat_r = R2 * locat;*/
   //    /*double kl = f / locat_l[2];
   //    double kr = f / locat_r[2];*/
-  //    //»òÕß
+  //    //æˆ–è€…
   //    /*Vector3d HL = KL * R1 * locat_l;
   //    Vector3d HR = KR * R2 * locat_r;*/
 
@@ -229,9 +229,9 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //    std::cout << "N0." << n << ":" <<locat_l[2] << std::endl;*/
   //    //-----------------------------------------------------------------------
   //    for (int v = 0; v < 3; v++) {
-  //      image_l_rected.at<cv::Vec3b>(locat_l[0]/2, locat_l[1]/2)[v] = img_L.at<cv::Vec3b>(x, y)[v];//ÕâÀïµÄabs£¨x,y/10000£©Ö»ÊÇÓÃÀ´ÔİÊ±·ÀÖ¹±¨´í
-  //      image_r_rected.at<cv::Vec3b>(locat_r[0]/2, locat_r[1]/2)[v] = img_R.at<cv::Vec3b>(x, y)[v];//ÕâÀïµÄ¸³ÖµÓï¾ä»áµ¼ÖÂÒç³ö,Ô­ÒòÒÑ¾­²éÃ÷£¬ÒòÎª²»ÊÇÏñËØ×ø±ê£¬ÊÇºÁÃ××ø±êµÄÔ­Òò       
-  //        //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//²âÊÔ´úÂë
+  //      image_l_rected.at<cv::Vec3b>(locat_l[0]/2, locat_l[1]/2)[v] = img_L.at<cv::Vec3b>(x, y)[v];//è¿™é‡Œçš„absï¼ˆx,y/10000ï¼‰åªæ˜¯ç”¨æ¥æš‚æ—¶é˜²æ­¢æŠ¥é”™
+  //      image_r_rected.at<cv::Vec3b>(locat_r[0]/2, locat_r[1]/2)[v] = img_R.at<cv::Vec3b>(x, y)[v];//è¿™é‡Œçš„èµ‹å€¼è¯­å¥ä¼šå¯¼è‡´æº¢å‡º,åŸå› å·²ç»æŸ¥æ˜ï¼Œå› ä¸ºä¸æ˜¯åƒç´ åæ ‡ï¼Œæ˜¯æ¯«ç±³åæ ‡çš„åŸå›        
+  //        //image_l_rected.at<cv::Vec3b>(x, y)[v] = img_L.at<cv::Vec3b>(x, y)[v];//æµ‹è¯•ä»£ç 
   //        //image_r_rected.at<cv::Vec3b>(x, y)[v] = img_R.at<cv::Vec3b>(x, y)[v];
   //                                   
   //          
@@ -283,13 +283,13 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
  //Vec3d T = {-0.0676242, -0.0119106, -0.0116169};
 
 
- //// ½øÒ»²½½øĞĞË«Ä¿Ğ£Õı£¬ÕâÀïstereoRectifyº¯Êı±ØĞë½ÓÊÜdoubleÀàĞÍµÄMat£¬·ñÔò»á±¨´í£º
+ //// è¿›ä¸€æ­¥è¿›è¡ŒåŒç›®æ ¡æ­£ï¼Œè¿™é‡ŒstereoRectifyå‡½æ•°å¿…é¡»æ¥å—doubleç±»å‹çš„Matï¼Œå¦åˆ™ä¼šæŠ¥é”™ï¼š
  //// -205:Formats of input arguments do not match) All the matrices must have the
  //// same data type in function 'cvRodrigues2'
  //cv::Mat R1, R2, P1, P2, Q;
  //stereoRectify(K1, D1, K2, D2, img_L.size(), R, T, R1, R2, P1, P2, Q);
 
- //cout << "½øÒ»²½Ë«Ä¿Ğ£Õı½á¹û£º" << endl << endl;
+ //cout << "è¿›ä¸€æ­¥åŒç›®æ ¡æ­£ç»“æœï¼š" << endl << endl;
  //cout << R1 << endl;
  //cout << P1 << endl;
  //cout << R2 << endl;
@@ -299,13 +299,13 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
 
   
 
-/*ÒÉÎÊ£º
-    1.Èç¹û×ø±êµÄÎ»ÖÃÊÇdoubleÀàĞÍµÄ»°£¬»á²»»á²úÉúÑÏÖØÎó²î£¿ÎÒÇ¿×ª³Éint¿ÉÒÔÂğ£¿
-    2.Ö®ËùÒÔÓÃdoubleÀàĞÍÀ´´æ×ø±ê¾ØÕó£¬ÊÇÒòÎªÔÚ³ËÒÔR¾ØÕó£¨doubleĞÍ£©µÄÊ±ºò¾ØÕóÀàĞÍ²»Í¬»á·¢Éú±¨´í£¬Ö»ÄÜ°ÑÒ»¸öÕûÊı¾ØÕó»»³ÉdoubleµÄÁË
+/*ç–‘é—®ï¼š
+    1.å¦‚æœåæ ‡çš„ä½ç½®æ˜¯doubleç±»å‹çš„è¯ï¼Œä¼šä¸ä¼šäº§ç”Ÿä¸¥é‡è¯¯å·®ï¼Ÿæˆ‘å¼ºè½¬æˆintå¯ä»¥å—ï¼Ÿ
+    2.ä¹‹æ‰€ä»¥ç”¨doubleç±»å‹æ¥å­˜åæ ‡çŸ©é˜µï¼Œæ˜¯å› ä¸ºåœ¨ä¹˜ä»¥RçŸ©é˜µï¼ˆdoubleå‹ï¼‰çš„æ—¶å€™çŸ©é˜µç±»å‹ä¸åŒä¼šå‘ç”ŸæŠ¥é”™ï¼Œåªèƒ½æŠŠä¸€ä¸ªæ•´æ•°çŸ©é˜µæ¢æˆdoubleçš„äº†
     
-    4.ºÃÏñÓÃT¾Í¿ÉÒÔµÃ³öRrect£¬ÎÒÃ»ÓĞÃ»ÓĞÓÃµ½ÄãËµµÄE^T*e=0Ê²Ã´µÄ
-!!! 5.Ğ£ÕıµÄÊ±ÊÇ²ÊÉ«Í¼Æ¬»¹ÊÇ»ÒÉ«Í¼Æ¬£¿Îª´ËÎÒµÄ¸³ÖµÓï¾äÔõÑù²ÅÄÜÕıÈ·£¨Êı¾İÀàĞÍÏÈĞ´doubleÁË£¬×ÜÖ®Ò²ÏÈÓÃ»ÒÉ«ÁË£©£¿
-    6.¿ÉÄÜ»¹»áÓĞÏ¸½ÚÉÏµÄç¢Â©£¬ÎÒÔÙ²é±é
+    4.å¥½åƒç”¨Tå°±å¯ä»¥å¾—å‡ºRrectï¼Œæˆ‘æ²¡æœ‰æ²¡æœ‰ç”¨åˆ°ä½ è¯´çš„E^T*e=0ä»€ä¹ˆçš„
+!!! 5.æ ¡æ­£çš„æ—¶æ˜¯å½©è‰²å›¾ç‰‡è¿˜æ˜¯ç°è‰²å›¾ç‰‡ï¼Ÿä¸ºæ­¤æˆ‘çš„èµ‹å€¼è¯­å¥æ€æ ·æ‰èƒ½æ­£ç¡®ï¼ˆæ•°æ®ç±»å‹å…ˆå†™doubleäº†ï¼Œæ€»ä¹‹ä¹Ÿå…ˆç”¨ç°è‰²äº†ï¼‰ï¼Ÿ
+    6.å¯èƒ½è¿˜ä¼šæœ‰ç»†èŠ‚ä¸Šçš„çº°æ¼ï¼Œæˆ‘å†æŸ¥é
 */
 
 //Mat image_l = imread(testset + "/im0.png");
