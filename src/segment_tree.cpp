@@ -32,6 +32,7 @@ NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
     State& top = stack.top();
     switch (top.num) {
       case 0:
+        assert(!isnan(top.cost_rec));
         if (top.node & (1 << 0) &&
             ((top.node >> 4) != 0 || top.pos == GRAPH_ROOT)) {
           uint32_t i = top.pos + 1;
@@ -43,6 +44,7 @@ NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 1:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos + 1))];
+        assert(!isnan(top.cost_rec));
       L1:
         if (top.node & (1 << 1) && (top.node >> 4) != 1) {
           uint32_t i = top.pos + Col;
@@ -54,6 +56,7 @@ NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 2:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos + Col))];
+        assert(!isnan(top.cost_rec));
       L2:
         if (top.node & (1 << 2) && (top.node >> 4) != 2) {
           uint32_t i = top.pos - 1;
@@ -65,6 +68,7 @@ NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 3:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos - 1))];
+        assert(!isnan(top.cost_rec));
       L3:
         if (top.node & (1 << 3) && (top.node >> 4) != 3) {
           uint32_t i = top.pos - Col;
@@ -76,8 +80,10 @@ NOALIAS void compute_cost_rec(const float* cost_ptr, const Mat_<Vec3b>& image_,
       case 4:
         top.cost_rec +=
             ret * coef[calculate_weight(top.i0, image_(top.pos - Col))];
+        assert(!isnan(top.cost_rec));
       L4:
         cost_rec_(top.pos) = ret = top.cost_rec;
+        assert(!isnan(ret));
         stack.pop();
         break;
 

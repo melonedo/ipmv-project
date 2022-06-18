@@ -9,7 +9,7 @@
 
 #define RAD 2
 
-#define GRAPH_ROOT 865100
+#define GRAPH_ROOT 86510
 
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);

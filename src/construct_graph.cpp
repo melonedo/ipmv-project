@@ -31,7 +31,8 @@ uint8_t get_edge_weight(Edge edge) { return edge.weight; }
 
 class DisjointSet {
  public:
-  DisjointSet(uint32_t size) : parent(size), max_weight(size, 0), node_num(size, 1) {
+  DisjointSet(uint32_t size)
+      : parent(size), max_weight(size, 0), node_num(size, 1) {
     for (uint32_t i = 0; i < size; i++) {
       parent[i] = i;
     }
@@ -140,7 +141,7 @@ void show_tree(const Mat_<Vec3b>& image_, const Mat_<uint8_t>& graph_) {
   namedWindow("test", WINDOW_NORMAL);
   Mat temp3, res;
   cvtColor(temp + .03, temp3, COLOR_GRAY2BGR);
-  multiply(image_, temp3, res, 1.f/30, CV_32FC3);
+  multiply(image_, temp3, res, 1.f / 30, CV_32FC3);
   imshow("test", res);
   waitKey(0);
 }
@@ -186,7 +187,9 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
 
   // 按照Segment Tree写但实际上是最小生成树，因为比Segment Tree表现要好。
   // 连接片段
-  for (int i = 0; i < edges.size(); i++) {
+  for (int i = 0; i < edges.size() &&
+                  count != (Row - 2 - 2 * RAD) * (Col - 2 - 2 * RAD) - 1;
+       i++) {
     Edge e = edges[i];
     uint32_t p1, p2;
     get_points(e, Col, p1, p2);
