@@ -23,7 +23,7 @@ using namespace std;
 //！！！如果你想把参数（内参矩阵、畸变系数向量、R，T）直接存在这个程序里，不用输入的话，用下面这段声明！！！
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image_l_rected, cv::Mat& image_r_rected) {                       
   
-   double d_left[1][5] = {0,0,0,0,0};
+  /* double d_left[1][5] = {0,0,0,0,0};
    Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
 
    double d_right[1][5] = {0,0,0,0,0};
@@ -53,96 +53,155 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   double R_stereo[3][3] = {
       0.9997826605620699,    0.004051019540949904,  0.02045044938645102,
       -0.004074743115292153, 0.999991072656389,     0.001118515117933302,
-      -0.02044573569166274,  -0.001201602348328341, 0.9997902420227071};
-  Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
-  Vec3d T = {0.0676242, 0.0119106,0.0116169};
+      -0.02044573569166274,  -0.001201602348328341, 0.9997902420227071};*/
+  /*Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
+  Vec3d T = {0.0676242, 0.0119106,0.0116169};*/
   
-  /*cv::Mat R_l, R_r, P1, P2, Q;
-   stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
-   cout << "module_l" << P1 << endl;
-   cout << "module_r" << P2<< endl;*/
-
-
+  //用cv自带函数进行校正，对照组
+  
+   
+   
   const size_t Row = img_L.size[0];//1080
   const size_t Col = img_L.size[1];//1920
     
+  Mat R, E, F;
+  /*Mat cameraMatrix1 = Mat(3, 3, CV_32FC1, Scalar::all(0));
+  Mat cameraMatrix2 = Mat(3, 3, CV_32FC1, Scalar::all(0));
+  Mat distCoeffs1 = Mat(1, 5, CV_32FC1, Scalar::all(0));
+  Mat distCoeffs = Mat(1, 5, CV_32FC1, Scalar::all(0));*/
+  vector<Mat> tvecsMat; /* 每幅图像的旋转向量 */
+  vector<Mat> rvecsMat;      
+  Mat K_L ;
+  Mat K_R ;
+  Mat D1, D2;
+  Vec3d T;
+  Mat gray_L, gray_R;
+
+  vector<cv::Point3f> objectpoint;
+  vector<vector<cv::Point3f>> objpoint;
+  // image_points1、imagePoints2中每个元素都是一个小vector，每个小vector存储的每个元素都是opencv的cv::Point2f数据结构
+  vector<vector<Point2f> > imagePoints1, imagePoints2;
+  vector<Point2f> corner_L, corner_R;
+
+  int board_Row = 7;
+  int board_Col = 11;
+  int squaresize = 30;
+  Size boardsize = Size(board_Col, board_Row);
+  cvtColor(img_L, gray_L, CV_BGR2GRAY);
+  cvtColor(img_R, gray_R, CV_BGR2GRAY);
+  bool foundL=0, foundR=0;
+  foundL = findChessboardCorners(img_L, boardsize, corner_L);
+  foundR = findChessboardCorners(img_R, boardsize, corner_R);
+  cornerSubPix(gray_L, corner_L, cv::Size(5, 5), cv::Size(-1, -1),TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01));
+  cornerSubPix(gray_R, corner_R, cv::Size(5, 5), cv::Size(-1, -1), TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01));
+  /*drawChessboardCorners(img_L, boardsize, corner_L, foundL);
+  cv::imshow("L", img_L);
+  cv::waitKey(1);
+  drawChessboardCorners(img_R, boardsize, corner_R, foundR);
+  cv::imshow("R", img_R);
+  cv::waitKey(10);*/
  
-  Matrix3d r; 
-  Vector3d T1;
-  Matrix3d KL;//
-  Matrix3d KR;//
-  cv2eigen(R,r);
-  cv2eigen(T, T1);
-  //---------------------------------------------
-  cv2eigen(K_L, KL);
-  cv2eigen(K_R, KR);
-  
-  //----------------------------------
-    
+  for (int i = 0; i < board_Row; i++) {
+    for (int j = 0; j < board_Col; j++) {
+      objectpoint.push_back(cv::Point3f(i * squaresize, j * squaresize, 0.0f));  
+    }
+  }
  
-  Vector3d I(0, 0, 1);
-  double TT = T1.norm();
-  Vector3d E1 = T1 / TT;
-  Vector3d E2 = I.cross(T1) / (I.cross(T1)).norm();
-  Vector3d E3 = E1.cross(E2);
-  Matrix<double, 3, 3> temp;
-  Matrix<double, 3, 3> Rrect;
-  temp << E1, E2, E3;
-  Rrect = temp.transpose();
-  Matrix<double, 3, 3> R1 = Rrect;
-  Matrix<double, 3, 3> R2 = r*Rrect;
+  objpoint.push_back(objectpoint);
+  imagePoints1.push_back(corner_L);
+  imagePoints2.push_back(corner_R);  
+  calibrateCamera(objpoint, imagePoints1, img_L.size(), K_L, D1, rvecsMat,tvecsMat, 0);       
+  calibrateCamera(objpoint, imagePoints2, img_R.size(), K_R, D2, rvecsMat,tvecsMat, 0);
+                  
 
-  Matrix<double, 3, 4> PL;
-  Matrix<double, 3, 4> PR;
-  Vector3d ZERO(0, 0, 0);
-  Matrix<double, 3, 4> M1_L;
-  Matrix<double, 3, 4> M1_R;
-  Matrix<double, 4, 4> M2;
-  Matrix<double, 3, 4> top;
-  Matrix<double, 1, 4> buttom(0,0,0,1);
-  
-  M1_L << KL, ZERO;
-  M1_R << KR,ZERO;
-  top << r, T1;
-  M2 << top,
-        buttom;
-  PL = M1_L * M2;
-  PR = M1_R * M2;
-  
-  cout << "KL=" << KL << endl;
-  cout << "KR=" << KR << endl;
-  cout << "M1_L=" << M1_L << endl;
-  cout << "M1_R=" << M1_R << endl;
-  cout << "M2=" << M2 << endl;
-  cout << "PL=" << PL << endl;
-  cout << "PR=" << PR << endl;
+  /*object_points.push_back(obj);*/
+  /*cout << "corner;" << corner_R;*/
+  stereoCalibrate(objpoint, imagePoints1, imagePoints2, K_L, D1, K_R, D2, img_L.size(), R,T, E, F,CALIB_USE_INTRINSIC_GUESS,cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,1e-6));
+      
+  cv::Mat R_l, R_r, P1, P2, Q;
+  stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
+  /*cout << "module_l" << P1 << endl;
+  cout << "module_r" << P2<< endl;       */             
+      
+      
+                  
+  /*cout << "KL=" << K_L << endl;
+  cout << "KR=" << K_R << endl;
+  cout << "D1=" <<D1 << endl;
+  cout << "D2=" << D2 << endl;
+  cout << "R=" << R << endl;
+  cout << "T=" << T << endl;*/
+  /*cout << "PR=" << PR << endl;     */     
+                 
+               
+  //Matrix3d r; 
+  //Vector3d T1;
+  //Matrix3d KL;//
+  //Matrix3d KR;//
+  //cv2eigen(R,r);
+  //cv2eigen(T, T1);
+  //cv2eigen(K_L, KL);
+  //cv2eigen(K_R, KR);
+  // 
+  //Vector3d I(0, 0, 1);
+  //double TT = T1.norm();
+  //Vector3d E1 = T1 / TT;
+  //Vector3d E2 = I.cross(T1) / (I.cross(T1)).norm();
+  //Vector3d E3 = E1.cross(E2);
+  //Matrix<double, 3, 3> temp;
+  //Matrix<double, 3, 3> Rrect;
+  //temp << E1, E2, E3;
+  //Rrect = temp.transpose();
+  //Matrix<double, 3, 3> R1 = Rrect;
+  //Matrix<double, 3, 3> R2 = r*Rrect;
 
-    
-  //测试用代码
-  //------------------------------------------------------------
-
-  
-  
-  
-  //------------------------------------------------------------
-    cv::Mat lmapx, lmapy, rmapx, rmapy;
-  cv::Mat r1, r2,p1,p2;
-  eigen2cv(R1, r1);
-  eigen2cv(R2, r2);
-  eigen2cv(PL, p1);
-  eigen2cv(PR, p2);
-  cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
+  //Matrix<double, 3, 4> PL;
+  //Matrix<double, 3, 4> PR;
+  //Vector3d ZERO(0, 0, 0);
+  //Matrix<double, 3, 4> M1_L;
+  //Matrix<double, 3, 4> M1_R;
+  //Matrix<double, 4, 4> M2;
+  //Matrix<double, 3, 4> top;
+  //Matrix<double, 1, 4> buttom(0,0,0,1);
+  //
+  //M1_L << KL, ZERO;
+  //M1_R << KR,ZERO;
+  //top << r, T1;
+  //M2 << top,
+  //      buttom;
+  //PL = M1_L * M2;
+  //PR = M1_R * M2;
+  //
+ 
+  cv::Mat lmapx, lmapy, rmapx, rmapy;
+  //cv::Mat r1, r2,p1,p2;
+  //eigen2cv(R1, r1);
+  //eigen2cv(R2, r2);
+  //eigen2cv(PL, p1);
+  //eigen2cv(PR, p2);
+  /*cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
+                              rmapy);*/
+  //对照组程序
+  cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
+                              lmapy);
+  cv::initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
                               rmapy);
   cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
-  cv::imshow("left.jpg", image_l_rected);
-  cv::imshow("right.jpg", image_r_rected);
+  /*cv::imshow("left.jpg", image_l_rected);
+  cv::imshow("right.jpg", image_r_rected);*/
   cv::waitKey(0);    
     
-  //#pragma omp parallel for
-  //for (int x = 1 ; x < Row ; x++) {
+ 
+
+  //    //测试用代码
+  //    //------------------------------------------------------------
+  
+
+   //#pragma omp parallel for
+  // for (int x = 1 ; x < Row ; x++) {
   //  for (int y = 1 ; y < Col ; y++) {
   //    locat = {double(x), double(y), 1};
   //    locat_l = KL * R1  * KL.inverse()* locat;
@@ -155,15 +214,12 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, Mat& image
   //    /*Vector3d HL = KL * R1 * locat_l;
   //    Vector3d HR = KR * R2 * locat_r;*/
 
-
-  //    //测试用代码
-  //    //------------------------------------------------------------
-  
   //    /*cout << " K_L * R1 " << K_L * R1 * locat_l<< endl;
   //    cout << " K_R * R2 " << K_R * R2 * locat_r << endl;*/
   //    /*Vector3d templ = K_L * R1 * locat_l ;
   //    Vector3d tempr = K_R * R2 * locat_r;
   //    
+   
 
   //    if (templ[2] > max) {
   //      max = templ[2];
