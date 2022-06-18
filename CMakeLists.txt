@@ -18,11 +18,11 @@ add_executable(main
     src/main.cpp
     src/util.cpp
     src/compute_cost.cpp
-    src/aggregate_cost.cpp
     src/choose_disparity.cpp
     src/refine_disparity.cpp
     src/construct_graph.cpp
-)
+    src/segment_tree.cpp
+    )
 
 target_link_libraries(main OpenCV Eigen OpenMP::OpenMP_CXX)
 

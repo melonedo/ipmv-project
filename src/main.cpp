@@ -14,7 +14,7 @@ int main(int argc, const char *argv[]) {
   std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
 
   Calib calib = read_calib(testset + "/calib.txt");
-  // calib.ndisp = 8; // 方便调试
+  // calib.ndisp = 8;  // 方便调试
   Mat image_l = imread(testset + "/im0.png");
   Mat image_r = imread(testset + "/im1.png");
 
@@ -32,21 +32,14 @@ int main(int argc, const char *argv[]) {
 
   Mat disp_out{shape2, CV_32FC1};
 
-  Mat reference_l{shape2, CV_8UC1};
-  Mat reference_r{shape2, CV_8UC1};
-
   using namespace std::chrono;
   high_resolution_clock::time_point t1, t2;
 
   t1 = high_resolution_clock::now();
 
-  construct_tree(image_l, reference_l);
-  construct_tree(image_r, reference_r);
-
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(cost_l, image_l, reference_l, cost_out_l);
-  aggregate_cost(cost_r, image_r, reference_r, cost_out_r);
+  segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);

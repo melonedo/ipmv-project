@@ -191,3 +191,14 @@ void aggregate_cost(const Mat& cost_in, const Mat& image, const Mat& graph,
 #endif
   }
 }
+
+void segment_tree(const cv::Mat& image_l, const cv::Mat& image_r,
+                  const cv::Mat& cost_in_l, const cv::Mat& cost_in_r,
+                  cv::Mat& cost_out_l, cv::Mat& cost_out_r) {
+  Mat reference_l(image_l.rows, image_l.cols, CV_8UC1, Scalar{0});
+  Mat reference_r(image_l.rows, image_l.cols, CV_8UC1, Scalar{0});
+  construct_tree(image_l, reference_l);
+  construct_tree(image_r, reference_r);
+  aggregate_cost(cost_in_l, image_l, reference_l, cost_out_l);
+  aggregate_cost(cost_in_r, image_r, reference_r, cost_out_r);
+}
