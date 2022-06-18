@@ -17,10 +17,10 @@ int main(int argc, const char *argv[]) {
   // calib.ndisp = 8;  // 方便调试
   Mat image_l = imread(testset + "/im0.png");
   Mat image_r = imread(testset + "/im1.png");
-  cv::resize(image_l, image_l, {960, 480});
-  cv::resize(image_r, image_r, {960, 480});
-  calib.height /= 2;
-  calib.width /= 2;
+  // cv::resize(image_l, image_l, {960, 540});
+  // cv::resize(image_r, image_r, {960, 540});
+  // calib.height /= 2;
+  // calib.width /= 2;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -43,8 +43,8 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  // segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
-  bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
+  segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
+  // bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
@@ -55,10 +55,10 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  imshow("result", disp_out);
+  imshow("result", disp_out / calib.vmax);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
+  imshow("truth", truth.data / calib.vmax);
 
   waitKey();
   return 0;

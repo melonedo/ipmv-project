@@ -10,7 +10,7 @@
 using namespace cv;
 
 // Segment-Tree based Cost Aggregation for Stereo Matching
-#define K 200
+#define K 1200
 
 struct Edge {
   uint32_t weight : 8;

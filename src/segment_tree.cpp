@@ -5,7 +5,8 @@
 
 using namespace cv;
 
-#define sigma (.5f * 255)
+// 1080p用.5，540p用.3
+#define sigma (.8f * 255)
 
 // #define SHOW_AGGREGATION
 
@@ -181,8 +182,8 @@ void aggregate_cost(const Mat& cost_in, const Mat& image, const Mat& graph,
     compute_cost_d(cost_in_ptr, image_, graph_, cost_rec_, coef, cost_out_ptr);
 
 #ifdef SHOW_AGGREGATION
-    namedWindow("test", WINDOW_NORMAL);
-    Mat temp = Mat(Row, Col, CV_32FC1, cost_out_ptr) / 1000;
+    // namedWindow("test", WINDOW_NORMAL);
+    Mat temp = Mat(Row, Col, CV_32FC1, const_cast<float*>(cost_out_ptr)) / 1000;
     using namespace std::string_literals;
     putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3,
             Scalar{1}, 5, 8, false);
