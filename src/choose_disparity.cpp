@@ -22,7 +22,7 @@ NOALIAS void choose_disparity(const Mat& cost, Mat& disp) {
         if ((cost_value > max_value)) {
           max_value = cost_value;
           disp_value = k;
-        }
+        }      
       }
       disp.at<uint16_t>(x, y) = disp_value;
     }

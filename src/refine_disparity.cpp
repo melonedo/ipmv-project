@@ -8,7 +8,8 @@
 
 using namespace cv;
 
-void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
+void refine_disparity(const Mat& disp_l,
+                      const Mat& disp_r, const Mat& cost,
                       Mat& disp_out) {
   const size_t MaxDistance = cost.size[0];  // Maxdsitance=170
   const size_t Row = disp_l.size[0];
