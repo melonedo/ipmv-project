@@ -10,13 +10,13 @@ using namespace cv;
 using namespace std;
 
 #define rad 1
-#define aggsize 7
+#define aggsize 10
 #define sigma1 1.75
 #define sigma2 3.5
 
 using namespace cv;
 
-void aggregate_cost(const Mat& image, const Mat& cost_in, Mat& cost_out_l, Mat& cost_out_r) {
+void bilateral_filter(const Mat& image, const Mat& cost_in, Mat& cost_out_l, Mat& cost_out_r) {
   size_t Row = cost_in.size[1];
   size_t Col = cost_in.size[2];
   size_t MaxDistance = cost_in.size[0];

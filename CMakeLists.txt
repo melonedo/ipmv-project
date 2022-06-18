@@ -18,7 +18,7 @@ add_executable(main
     src/main.cpp
     src/util.cpp
     src/compute_cost.cpp
-    src/aggregate_cost.cpp
+    src/bilateral_filter.cpp
     src/choose_disparity.cpp
     src/refine_disparity.cpp)
 

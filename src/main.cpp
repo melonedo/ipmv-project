@@ -11,7 +11,7 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
+  std::string testset = argc >= 2 ? argv[1] : "data/bandsaw1";
 
   Calib calib = read_calib(testset + "/calib.txt");
   Mat image_l = imread(testset + "/im0.png");
@@ -42,7 +42,7 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(image_l, cost_l, cost_out_l, cost_out_r);
+  bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
