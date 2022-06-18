@@ -161,8 +161,8 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
     }
   }
 
-//   std::shuffle(edges.begin(), edges.end(),
-//                       std::mt19937{std::random_device{}()});
+  //   std::shuffle(edges.begin(), edges.end(),
+  //                       std::mt19937{std::random_device{}()});
 
   std::sort(
       std::execution::par_unseq, edges.begin(), edges.end(),
@@ -261,6 +261,6 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
     }
   }
 
-//   show_tree(reinterpret_cast<const Mat3b&>(image),
-//             reinterpret_cast<const Mat1b&>(graph));
+  //   show_tree(reinterpret_cast<const Mat3b&>(image),
+  //             reinterpret_cast<const Mat1b&>(graph));
 }

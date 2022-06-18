@@ -1,16 +1,17 @@
-#include "pipeline.hpp"
 #include <math.h>
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include "pipeline.hpp"
 using namespace cv;
 
-
-void choose_disparity(const Mat& cost, Mat& disp) {
+NOALIAS void choose_disparity(const Mat& cost, Mat& disp) {
   const size_t MaxDistance = cost.size[0];
   const size_t Row = cost.size[1];
   const size_t Col = cost.size[2];
-  
+
 #pragma omp parallel for
   for (int x = 1 + RAD; x < Row - 1 - RAD; x++) {
     for (int y = 1 + RAD; y < Col - 1 - RAD; y++) {

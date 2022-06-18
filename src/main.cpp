@@ -11,7 +11,7 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/ladder1";
+  std::string testset = argc >= 2 ? argv[1] : "data/artroom2";
 
   Calib calib = read_calib(testset + "/calib.txt");
   // calib.ndisp = 8;  // 方便调试

@@ -13,9 +13,7 @@ void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
   const size_t MaxDistance = cost.size[0];  // Maxdsitance=170
   const size_t Row = disp_l.size[0];
   const size_t Col = disp_l.size[1];
-  /*imshow("disp_out", disp_out);*/
-  /*int n = 0;*/
-  /*disp_out.setTo(Scalar::all(170));*/
+  
 #pragma omp parallel for
   for (int x = 0; x < Row; x++) {
     for (int y = 0; y < Col; y++) {

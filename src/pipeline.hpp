@@ -2,6 +2,11 @@
 
 #include <opencv2/opencv.hpp>
 
+// #define NOALIAS __declspec(noalias)
+#ifndef NOALIAS
+#define NOALIAS
+#endif
+
 #define RAD 2
 
 #define GRAPH_ROOT 20000
