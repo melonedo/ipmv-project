@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) {
   // cv::resize(image_r, image_r, {960, 540});
   calib.height = image_l.rows;
   calib.width = image_l.cols;
-  calib.ndisp = 130;
+  calib.ndisp = 200;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -67,13 +67,13 @@ int main(int argc, const char *argv[]) {
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
 
-  imshow("image_l_rected", image_l_rected); 
-    //校正输出
-  imshow("image_r_rected", image_r_rected);
-  imshow("disp_l", disp_out / 190);
+  //imshow("image_l_rected", image_l_rected); 
+  //  //校正输出
+  //imshow("image_r_rected", image_r_rected);
+  /*imshow("disp_l", disp_out / 190);*/
+  
+  imshow("result", disp_out / 76);
   /*
-  imshow("result", disp_out / calib.vmax);
-
   PFM truth = read_pfm(testset + "/disp0.pfm");
   imshow("truth", truth.data / calib.vmax);*/
 
