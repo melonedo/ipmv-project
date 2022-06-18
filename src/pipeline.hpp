@@ -4,13 +4,10 @@
 
 #define RAD 2
 
-#define GRAPH_ROOT 1153000
+#define GRAPH_ROOT 20000
 
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
-
-void aggregate_cost(const cv::Mat& image, const cv::Mat& cost_in,
-                    cv::Mat& cost_out_l, cv::Mat& cost_out_r);
 
 void choose_disparity(const cv::Mat& cost, cv::Mat& disp);
 
@@ -23,4 +20,11 @@ void refine_disparity(const cv::Mat& disp_l, const cv::Mat& disp_r,
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R, cv::Mat& image_l_rected, cv::Mat& image_r_rected);
                                                                           
 
-void construct_tree(const cv::Mat& in, cv::Mat& out);
+void segment_tree(const cv::Mat& image_l, const cv::Mat& image_r,
+                  const cv::Mat& cost_in_l, const cv::Mat& cost_in_r,
+                  cv::Mat& cost_out_l, cv::Mat& cost_out_r);
+
+void construct_tree(const cv::Mat& image, cv::Mat& graph);
+
+void bilateral_filter(const cv::Mat& image, const cv::Mat& cost_in,
+                      cv::Mat& cost_out_l, cv::Mat& cost_out_r);

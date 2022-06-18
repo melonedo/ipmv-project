@@ -10,7 +10,7 @@
 using namespace cv;
 
 // Segment-Tree based Cost Aggregation for Stereo Matching
-#define K 200
+#define K 1200
 
 struct Edge {
   uint32_t weight : 8;
@@ -170,7 +170,7 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
 
   // 节点
   // 最小到大 x+ y+ x- y- 父节点的方向（2位） 无用（2位）
-  graph.setTo(Scalar::all(0x00));
+  // graph.setTo(Scalar::all(0x00));
 
   // 并查集
   DisjointSet set(Row * Col);

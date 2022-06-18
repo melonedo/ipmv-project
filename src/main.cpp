@@ -11,16 +11,16 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
+  std::string testset = argc >= 2 ? argv[1] : "data/ladder1";
 
   Calib calib = read_calib(testset + "/calib.txt");
-  // calib.ndisp = 8; // 方便调试
+  // calib.ndisp = 8;  // 方便调试
   Mat image_l = imread(testset + "/im0.png");
   Mat image_r = imread(testset + "/im1.png");
-  cv::resize(image_l, image_l, {960, 480});
-  cv::resize(image_r, image_r, {960, 480});
-  calib.height /= 2;
-  calib.width /= 2;
+  // cv::resize(image_l, image_l, {960, 540});
+  // cv::resize(image_r, image_r, {960, 540});
+  calib.height = image_l.rows;
+  calib.width = image_l.cols;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -38,25 +38,20 @@ int main(int argc, const char *argv[]) {
   Mat cost_out_l{shape3, CV_32FC1};
   Mat cost_out_r{shape3, CV_32FC1};
 
-  Mat disp_l{shape2, CV_8UC1};
-  Mat disp_r{shape2, CV_8UC1};
+  Mat disp_l{shape2, CV_16UC1};
+  Mat disp_r{shape2, CV_16UC1};
 
   Mat disp_out{shape2, CV_32FC1};
-
-  Mat reference_l{shape2, CV_8UC1};
-  Mat reference_r{shape2, CV_8UC1};
 
   using namespace std::chrono;
   high_resolution_clock::time_point t1, t2;
 
   t1 = high_resolution_clock::now();
 
-  construct_tree(image_l, reference_l);
-  construct_tree(image_r, reference_r);
-
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  aggregate_cost(image_l, cost_l, cost_out_l, cost_out_r);
+  segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
+  // bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
@@ -67,19 +62,10 @@ int main(int argc, const char *argv[]) {
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  
-  namedWindow("result_l", WINDOW_NORMAL);
-  namedWindow("result_r", WINDOW_NORMAL);
-  namedWindow("result_out", WINDOW_NORMAL);
-  
-  imshow("result_l", disp_l);
-  imshow("result_r", disp_r);
-  imshow("result_out", disp_out);
- 
-  imshow("result", disp_l);
+  imshow("result", disp_out / calib.vmax);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
+  imshow("truth", truth.data / calib.vmax);
 
   waitKey();
   return 0;

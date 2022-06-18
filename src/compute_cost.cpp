@@ -90,9 +90,10 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
           gray_R.at<uint8_t>(x, y) * gray_R.at<uint8_t>(x, y);
   }
 
+#ifndef SHOW_DISPARITY
 #pragma omp parallel for
+#endif
   for (int d = 0; d < MaxDistance; d++) {
-    Mat sum(Row, Col, CV_32SC1);
 #ifdef SHOW_DISPARITY
     Mat temp(Row, Col, CV_32FC1);
 #endif
