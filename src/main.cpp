@@ -17,12 +17,16 @@ int main(int argc, const char *argv[]) {
   // calib.ndisp = 8;  // 方便调试
   Mat image_l = imread(testset + "/im0.png");
   Mat image_r = imread(testset + "/im1.png");
+  cv::resize(image_l, image_l, {960, 480});
+  cv::resize(image_r, image_r, {960, 480});
+  calib.height /= 2;
+  calib.width /= 2;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
-  Mat cost_l{shape3, CV_32FC1};
-  Mat cost_r{shape3, CV_32FC1};
+  Mat cost_l{shape3, CV_32FC1, {0.f}};
+  Mat cost_r{shape3, CV_32FC1, {0.f}};
 
   Mat cost_out_l{shape3, CV_32FC1};
   Mat cost_out_r{shape3, CV_32FC1};
@@ -39,24 +43,21 @@ int main(int argc, const char *argv[]) {
 
   compute_cost(image_l, image_r, cost_l, cost_r);
 
-  segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
+  // segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
+  bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
   choose_disparity(cost_out_r, disp_r);
 
-  // refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
+  refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
 
   t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
-  namedWindow("result_l", WINDOW_NORMAL);
-  namedWindow("result_r", WINDOW_NORMAL);
-  imshow("result_l", disp_l);
-  imshow("result_r", disp_r);
+  imshow("result", disp_out);
 
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  namedWindow("truth", WINDOW_NORMAL);
   imshow("truth", (truth.data - calib.vmin) / (calib.vmax - calib.vmin));
 
   waitKey();

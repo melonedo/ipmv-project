@@ -4,7 +4,7 @@
 
 #define RAD 2
 
-#define GRAPH_ROOT 1153000
+#define GRAPH_ROOT 0
 
 void compute_cost(const cv::Mat& image_L, const cv::Mat& image_R,
                   cv::Mat& cost_L, cv::Mat& cost_R);
@@ -19,3 +19,6 @@ void segment_tree(const cv::Mat& image_l, const cv::Mat& image_r,
                   cv::Mat& cost_out_l, cv::Mat& cost_out_r);
 
 void construct_tree(const cv::Mat& image, cv::Mat& graph);
+
+void bilateral_filter(const cv::Mat& image, const cv::Mat& cost_in,
+                      cv::Mat& cost_out_l, cv::Mat& cost_out_r);

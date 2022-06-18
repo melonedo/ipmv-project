@@ -18,6 +18,7 @@ add_executable(main
     src/main.cpp
     src/util.cpp
     src/compute_cost.cpp
+    src/bilateral_filter.cpp
     src/choose_disparity.cpp
     src/refine_disparity.cpp
     src/construct_graph.cpp
@@ -43,6 +44,7 @@ if(MSVC)
     target_compile_options(main PRIVATE
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>: /utf-8 >
         $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>: -Xcompiler=/utf-8>
+        $<$<BUILD_INTERFACE:$<CONFIG:Release,RelWithDebInfo>>: /Ob3>
     )
 endif()
 

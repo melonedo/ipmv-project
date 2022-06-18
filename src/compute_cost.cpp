@@ -90,9 +90,6 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
           gray_R.at<uint8_t>(x, y) * gray_R.at<uint8_t>(x, y);
   }
 
-  cost_L.setTo(Scalar::all(0));
-  cost_R.setTo(Scalar::all(0));
-
 #ifndef SHOW_DISPARITY
 #pragma omp parallel for
 #endif
@@ -170,7 +167,7 @@ void compute_cost(const Mat& image_L, const Mat& image_R, Mat& cost_L,
         }
       }
 #ifdef SHOW_DISPARITY
-      namedWindow("test", WINDOW_NORMAL);
+      // namedWindow("test", WINDOW_NORMAL);
       putText(temp, "d="s + std::to_string(d), {0, 150}, FONT_HERSHEY_SIMPLEX, 3, Scalar{1}, 5, 8, false);
       imshow("test", temp);
       waitKey(1);
