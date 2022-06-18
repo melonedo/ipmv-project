@@ -4,7 +4,7 @@
 
 #include "pipeline.hpp"
 
-#define threshold 5
+#define threshold 10
 
 using namespace cv;
 
@@ -19,12 +19,12 @@ void refine_disparity(const Mat& disp_l, const Mat& disp_r, const Mat& cost,
 #pragma omp parallel for
   for (int x = 0; x < Row; x++) {
     for (int y = 0; y < Col; y++) {
-      uint8_t dl = disp_l.at<uint8_t>(x, y);
+      uint16_t dl = disp_l.at<uint16_t>(x, y);
       if (y < dl) {
         disp_out.at<float>(x, y) = 0;
         continue;
       }
-      uint8_t dr = disp_r.at<uint8_t>(x, y - dl);
+      uint16_t dr = disp_r.at<uint16_t>(x, y - dl);
       if (abs(dl - dr) > threshold) {
         disp_out.at<float>(x, y) = 0;
       } else if (dl > 1 && dl < MaxDistance - 1){

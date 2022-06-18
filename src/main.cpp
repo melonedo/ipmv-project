@@ -11,7 +11,7 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
+  std::string testset = argc >= 2 ? argv[1] : "data/ladder1";
 
   Calib calib = read_calib(testset + "/calib.txt");
   // calib.ndisp = 8;  // 方便调试
@@ -19,8 +19,8 @@ int main(int argc, const char *argv[]) {
   Mat image_r = imread(testset + "/im1.png");
   // cv::resize(image_l, image_l, {960, 540});
   // cv::resize(image_r, image_r, {960, 540});
-  // calib.height /= 2;
-  // calib.width /= 2;
+  calib.height = image_l.rows;
+  calib.width = image_l.cols;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -31,8 +31,8 @@ int main(int argc, const char *argv[]) {
   Mat cost_out_l{shape3, CV_32FC1};
   Mat cost_out_r{shape3, CV_32FC1};
 
-  Mat disp_l{shape2, CV_8UC1};
-  Mat disp_r{shape2, CV_8UC1};
+  Mat disp_l{shape2, CV_16UC1};
+  Mat disp_r{shape2, CV_16UC1};
 
   Mat disp_out{shape2, CV_32FC1};
 

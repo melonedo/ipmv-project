@@ -15,7 +15,7 @@ void choose_disparity(const Mat& cost, Mat& disp) {
   for (int x = 1 + RAD; x < Row - 1 - RAD; x++) {
     for (int y = 1 + RAD; y < Col - 1 - RAD; y++) {
       float max_value = 0;
-      uint8_t disp_value = 0;
+      uint16_t disp_value = 0;
       for (int k = 0; k < MaxDistance; k++) {
         float cost_value = cost.at<float>(k, x, y);
         if ((cost_value > max_value)) {
@@ -23,7 +23,7 @@ void choose_disparity(const Mat& cost, Mat& disp) {
           disp_value = k;
         }
       }
-      disp.at<uint8_t>(x, y) = disp_value;
+      disp.at<uint16_t>(x, y) = disp_value;
     }
   }
   /*imshow("disp0", disp);
