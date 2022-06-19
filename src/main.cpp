@@ -11,18 +11,18 @@
 using namespace cv;
 
 int main(int argc, const char *argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/artroom1";
+  std::string testset = argc >= 2 ? argv[1] : "data/ukulele2";
 
   Calib calib = read_calib(testset + "/calib.txt");
-  Mat image_l = imread(testset + "/im0.png");
-  Mat image_r = imread(testset + "/im1.png");
+  Mat image_l = imread(testset + "/im0.jpg");
+  Mat image_r = imread(testset + "/im1.jpg");
   Mat image_calib_l = imread("E:/ipmv-project/data/left/1.jpg");    //标定用的标定板
   Mat image_calib_r = imread("E:/ipmv-project/data/right/1.jpg");  //标定用的标定板
   // cv::resize(image_l, image_l, {960, 540});
   // cv::resize(image_r, image_r, {960, 540});
   calib.height = image_l.rows;
   calib.width = image_l.cols;
-  calib.ndisp = 200;
+  calib.ndisp = 250;
 
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
@@ -67,7 +67,8 @@ int main(int argc, const char *argv[]) {
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
 
-  imshow("result", disp_out / 76);
+  imshow("result", disp_out / 100);
+  imwrite("E:/ipmv-project/data/save/ukulellefinnal2.jpg", disp_out);
   
   PFM truth = read_pfm(testset + "/disp0.pfm");
   imshow("truth", truth.data / calib.vmax);

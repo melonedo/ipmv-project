@@ -16,11 +16,11 @@ using namespace std;
 
 
 
-void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,const cv::Mat& R, const cv::Mat& T, const cv::Mat& K_L,const cv::Mat& K_R,const cv::Mat& D1,const cv::Mat& D2,Mat& image_l_rected, Mat& image_r_rected) {                       
+void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,const cv::Mat& Ru, const cv::Mat& Tu, const cv::Mat& K_Lu,const cv::Mat& K_Ru,const cv::Mat& D1u,const cv::Mat& D2u,Mat& image_l_rected, Mat& image_r_rected) {                       
   
 
     //代码计算结果
- /*double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336, -0.007308380442553203, 0.01834444017828064, -0.1575561255791122};
+  double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336, -0.007308380442553203, 0.01834444017828064, -0.1575561255791122};
    Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
 
    double d_right[1][5] = {-0.3123616831963305, 0.7492919242979774, -0.005600943091007264, 0.01601327051434557, -2.391415265128237};
@@ -43,7 +43,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,const cv::M
  0.00895929610170791, -0.009563127049233127, 0.9999141351208124
 };
   Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
-  Vec3d T = {-65.0649, -0.139223, 27.6227};*/
+  Vec3d T = {-65.0649, -0.139223, 27.6227};
 
     //matlab计算,即对照组
   /*double d_left[1][5] = {-0.485164739871447,0.552024900666525,0,0,-0.336674278642270};                         
@@ -68,8 +68,8 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,const cv::M
   const size_t Col = img_L.size[1];//1920
 
   //对照组代码-----------------------------------------------------------------------------
-  /*cv::Mat R_l, R_r, P1, P2, Q;
-  stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);*/
+  cv::Mat R_l, R_r, P1, P2, Q;
+  stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
   //-----------------------------------------------------------------------------------------
   
   //将cv传递过来的矩阵转为eigen能用的---------
@@ -137,17 +137,19 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,const cv::M
 
   //最后的投影-----------------------
   
-  cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
+  /*cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
-                              rmapy);
+                              rmapy);*/
   //对照组
-  /*cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
+  cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
                               lmapy);
   cv::initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
-                              rmapy);*/
+                              rmapy);
   cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
+  imwrite("E:/ipmv-project/data/save/ukulellel.jpg", image_l_rected);
+  imwrite("E:/ipmv-project/data/save/ukuleller.jpg", image_r_rected);
   cv::imshow("left.jpg", image_l_rected);
   cv::imshow("right.jpg", image_r_rected);
   cv::waitKey(0);    
