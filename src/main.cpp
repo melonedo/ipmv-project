@@ -11,9 +11,13 @@ int main(int argc, const char* argv[]) {
   std::string testset = argc >= 2 ? argv[1] : "data/artroom2";
   std::vector<TestResult> results;
 
+  // 只跑代表性的数据
+  run_testset("data/artroom1", USE_SEGMENT_TREE, true, false);
+  waitKey(0);
   run_testset("data/ukulele2", USE_SEGMENT_TREE, false, true);
+  waitKey(0);
   return 0;
-
+  
   for (const auto& entry : std::filesystem::directory_iterator("data")) {
     if (!entry.is_directory()) continue;
     results.push_back(
