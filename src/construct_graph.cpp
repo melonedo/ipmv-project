@@ -7,6 +7,8 @@
 
 #include "pipeline.hpp"
 
+#define TRACE_DFS
+
 using namespace cv;
 
 // Segment-Tree based Cost Aggregation for Stereo Matching
@@ -234,40 +236,50 @@ void construct_tree(const cv::Mat& image, cv::Mat& graph) {
   // 方向同样 0~3对应x+ y+ x- y- (左 上 右 下)
   std::stack<uint32_t> stack;
   stack.push(GRAPH_ROOT);
-  //   cv::Mat temp{Row, Col, CV_8UC1, Scalar{0}};
-  //   cvtColor(image, temp, CV_BGR2GRAY);
+#ifdef TRACE_DFS
+  cv::Mat temp{Row, Col, CV_8UC1, Scalar{0}};
+  cvtColor(image, temp, CV_BGR2GRAY);
+#endif
   while (!stack.empty()) {
     uint32_t top = stack.top();
     uint8_t node = graph.at<uint8_t>(top);
     stack.pop();
-    // std::cout << top << ' ' << top / 1920 << ' ' << top % 1920 << ' '
-    //           << (node >> 4) << std::endl;
-    // temp.at<uint8_t>(top) = 244;
-    // imshow("test", temp);
-    // waitKey(1);
+#ifdef TRACE_DFS
+    temp.at<uint8_t>(top) = 244;
+    imshow("test", temp);
+    waitKey(1);
+#endif
     if (node & (1 << 0) && ((node >> 4) != 0 || top == GRAPH_ROOT)) {
       uint32_t i = top + 1;
       stack.push(i);
       graph.at<uint8_t>(i) |= 2 << 4;
-      // assert(temp.at<uint8_t>(i) == 0);
+#ifdef TRACE_DFS
+      assert(temp.at<uint8_t>(i) == 0);
+#endif
     }
     if (node & (1 << 1) && (node >> 4) != 1) {
       uint32_t i = top + Col;
       stack.push(i);
       graph.at<uint8_t>(i) |= 3 << 4;
-      // assert(temp.at<uint8_t>(i) == 0);
+#ifdef TRACE_DFS
+      assert(temp.at<uint8_t>(i) == 0);
+#endif
     }
     if (node & (1 << 2) && (node >> 4) != 2) {
       uint32_t i = top - 1;
       stack.push(i);
       graph.at<uint8_t>(i) |= 0 << 4;
-      // assert(temp.at<uint8_t>(i) == 0);
+#ifdef TRACE_DFS
+      assert(temp.at<uint8_t>(i) == 0);
+#endif
     }
     if (node & (1 << 3) && (node >> 4) != 3) {
       uint32_t i = top - Col;
       stack.push(i);
       graph.at<uint8_t>(i) |= 1 << 4;
-      // assert(temp.at<uint8_t>(i) == 0);
+#ifdef TRACE_DFS
+      assert(temp.at<uint8_t>(i) == 0);
+#endif
     }
   }
 

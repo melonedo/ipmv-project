@@ -25,6 +25,7 @@ add_executable(main
     src/stereo_rectification.cpp
     src/segment_tree.cpp
     src/run_testset.cpp
+    src/stereo_calib.cpp
     )
 
 target_link_libraries(main OpenCV Eigen OpenMP::OpenMP_CXX)
