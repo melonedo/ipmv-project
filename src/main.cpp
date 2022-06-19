@@ -49,12 +49,9 @@ int main(int argc, const char *argv[]) {
 
   stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
   
-  //compute_cost(image_l, image_r, cost_l, cost_r);//原版
-  compute_cost(image_l_rected, image_r_rected, cost_l, cost_r);//校正版
+  compute_cost(image_l_rected, image_r_rected, cost_l, cost_r);
 
-  //segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);//原版
-  segment_tree(image_l_rected, image_r_rected, cost_l, cost_r, cost_out_l, cost_out_r);//校正版
-              
+  segment_tree(image_l_rected, image_r_rected, cost_l, cost_r, cost_out_l, cost_out_r);              
   // bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
 
   choose_disparity(cost_out_l, disp_l);
@@ -67,15 +64,10 @@ int main(int argc, const char *argv[]) {
   std::cout << "Time: " << time_span.count() * 1000 << "ms" << std::endl;
 
 
-  //imshow("image_l_rected", image_l_rected); 
-  //  //校正输出
-  //imshow("image_r_rected", image_r_rected);
-  /*imshow("disp_l", disp_out / 190);*/
-  
   imshow("result", disp_out / 76);
-  /*
+  
   PFM truth = read_pfm(testset + "/disp0.pfm");
-  imshow("truth", truth.data / calib.vmax);*/
+  imshow("truth", truth.data / calib.vmax);
 
   waitKey();
   return 0;
