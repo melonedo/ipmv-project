@@ -56,15 +56,17 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
   if (calibrate)
     stereo_calib(image_l, image_r, R, T, KL, KR, DL, DR);
   else
-    preset_steroparams(R, T, KL, KR, DL, DR);
+    ;  // preset_steroparams(R, T, KL, KR, DL, DR);
 
   if (rectify_image) {
     Mat image_l_rected{shape2, CV_8UC3};
     Mat image_r_rected{shape2, CV_8UC3};
-    stereo_rectification(image_l, image_r, R, T, KL, KR, DL, DR, image_l_rected,
-                         image_r_rected);
+    stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
     image_l = image_l_rected;
     image_r = image_r_rected;
+    imshow("image_l_rected", image_l);
+    imshow("image_r_rected", image_r);
+    waitKey();
   }
   compute_cost(image_l, image_r, cost_l, cost_r);
 
@@ -86,11 +88,10 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
   t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
-  // imshow("image_l_rected", image_l);
-  // imshow("image_r_rected", image_r);
+  imshow("result", disp_out / calib.vmax);
 
-  //   imshow("result", disp_out / calib.vmax);
-
+  waitKey();
+  return {0.f, 0.f};
   PFM truth = read_pfm(testset + "/disp0.pfm");
   //   imshow("truth", truth.data / calib.vmax);
 

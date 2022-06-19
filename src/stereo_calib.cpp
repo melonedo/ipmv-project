@@ -11,15 +11,15 @@ using namespace Eigen;
 using namespace cv;
 using namespace std;
 
-void stereo_calib(const cv::Mat& img_L, const cv::Mat& img_R, Mat& R, Mat& T,
+void stereo_calib(const Mat& img_L, const Mat& img_R, Mat& R, Mat& T,
                   Mat& K_L, Mat& K_R, Mat& D1, Mat& D2) {
   Mat gray_L, gray_R;
   Mat E, F;
 
   vector<Mat> tvecsMat;
   vector<Mat> rvecsMat;
-  vector<cv::Point3f> objectpoint;
-  vector<vector<cv::Point3f>> objpoint;
+  vector<Point3f> objectpoint;
+  vector<vector<Point3f>> objpoint;
   vector<vector<Point2f>> imagePoints1, imagePoints2;
   vector<Point2f> corner_L, corner_R;
 
@@ -35,10 +35,10 @@ void stereo_calib(const cv::Mat& img_L, const cv::Mat& img_R, Mat& R, Mat& T,
   foundR = findChessboardCorners(img_R, boardsize, corner_R);
   if (foundL == true && foundR == true) {
     cornerSubPix(
-        gray_L, corner_L, cv::Size(5, 5), cv::Size(-1, -1),
+        gray_L, corner_L, Size(5, 5), Size(-1, -1),
         TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01));
     cornerSubPix(
-        gray_R, corner_R, cv::Size(5, 5), cv::Size(-1, -1),
+        gray_R, corner_R, Size(5, 5), Size(-1, -1),
         TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01));
     imagePoints1.push_back(corner_L);
     imagePoints2.push_back(corner_R);
@@ -49,7 +49,7 @@ void stereo_calib(const cv::Mat& img_L, const cv::Mat& img_R, Mat& R, Mat& T,
 
   for (int i = 0; i < board_Row; i++) {
     for (int j = 0; j < board_Col; j++) {
-      objectpoint.push_back(cv::Point3f(i * squaresize, j * squaresize,
+      objectpoint.push_back(Point3f(i * squaresize, j * squaresize,
                                         0.0f));  // squarsize:30.3mm
     }
   }
@@ -62,7 +62,7 @@ void stereo_calib(const cv::Mat& img_L, const cv::Mat& img_R, Mat& R, Mat& T,
   stereoCalibrate(
       objpoint, imagePoints1, imagePoints2, K_L, D1, K_R, D2, img_L.size(), R,
       T, E, F, CALIB_USE_INTRINSIC_GUESS,
-      cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,
+      TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30,
                        1e-6));
 
   cout << "R=" << R << endl;
