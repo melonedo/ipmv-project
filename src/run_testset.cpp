@@ -7,7 +7,8 @@
 
 using namespace cv;
 
-float run_testset(const std::string& testset, int method, bool rectify_image) {
+TestResult run_testset(const std::string& testset, int method, bool refine,
+                       bool rectify_image) {
   Calib calib = read_calib(testset + "/calib.txt");
 
   Mat image_l, image_r;
@@ -62,14 +63,17 @@ float run_testset(const std::string& testset, int method, bool rectify_image) {
   if (method == USE_BILATERAL_FILTER) {
     bilateral_filter(image_l, cost_l, cost_out_l, cost_out_r);
   } else if (method == USE_SEGMENT_TREE) {
-    segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r);
+    segment_tree(image_l, image_r, cost_l, cost_r, cost_out_l, cost_out_r,
+                 !refine);
   }
 
   choose_disparity(cost_out_l, disp_l);
-  //   choose_disparity(cost_out_r, disp_r);
-
-  //   refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
-  disp_l.convertTo(disp_out, CV_32FC1);
+  if (refine) {
+    choose_disparity(cost_out_r, disp_r);
+    refine_disparity(disp_l, disp_r, cost_out_l, disp_out);
+  } else {
+    disp_l.convertTo(disp_out, CV_32FC1);
+  }
 
   t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -100,5 +104,5 @@ float run_testset(const std::string& testset, int method, bool rectify_image) {
   imwrite(testset + "/result.tiff", disp_out / calib.vmax);
   imwrite(testset + "/truth.tiff", truth.data / calib.vmax);
   //   waitKey(0);
-  return 0;
+  return {time_span.count(), error_percentage};
 }
