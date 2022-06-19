@@ -7,7 +7,7 @@
 
 #include "pipeline.hpp"
 
-#define TRACE_DFS
+// #define TRACE_DFS
 
 using namespace cv;
 
