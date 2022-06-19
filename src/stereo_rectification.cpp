@@ -14,44 +14,43 @@ using namespace Eigen;
 using namespace cv;
 using namespace std;
 
-void preset_steroparams(Mat& R, Mat& T, Mat& K_L, Mat& K_R,
-                        Mat& D1, Mat& D2) {
-  //代码计算结果
+void preset_steroparams(cv::Mat& R, cv::Mat& T, cv::Mat& K_L, cv::Mat& K_R,
+                        cv::Mat& D1, cv::Mat& D2) {
+                          
+                        }
+
+void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
+                          Mat& image_l_rected, Mat& image_r_rected) {
+  // 标定结果
   double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336,
- -0.007308380442553203, 0.01834444017828064, -0.1575561255791122}; D1 =
- Mat(1, 5, DataType<double>::type, d_left);
+                         -0.007308380442553203, 0.01834444017828064,
+                         -0.1575561255791122};
+  Mat D1 = cv::Mat(1, 5, cv::DataType<double>::type, d_left);
 
-    double d_right[1][5] = {-0.3123616831963305, 0.7492919242979774,
- -0.005600943091007264, 0.01601327051434557, -2.391415265128237};
+  double d_right[1][5] = {-0.3123616831963305, 0.7492919242979774,
+                          -0.005600943091007264, 0.01601327051434557,
+                          -2.391415265128237};
 
-    D2 = Mat(1, 5, DataType<double>::type, d_right);
+  Mat D2 = cv::Mat(1, 5, cv::DataType<double>::type, d_right);
 
-   double K_left[3][3] = {995.5872941102477, 0, 507.6322439538547,
-  0, 993.1761254348543, 391.3618985410175,
-  0, 0, 1
- };
-   K_L = Mat(3, 3, DataType<double>::type, K_left);
-   double K_right[3][3] = {1059.943028057779, 0, 557.0605532130172,
-  0, 1058.429107553662, 406.6782374209959,
-  0, 0, 1
- };
-   K_R = Mat(3, 3, DataType<double>::type, K_right);
-   double R_stereo[3][3] = {
-       0.9999592144503071, 0.001226048321462626, -0.0089479741527445,
-  -0.001140372433315718, 0.9999535206231106, 0.009573721541786621,
-  0.00895929610170791, -0.009563127049233127, 0.9999141351208124
- };
-    R= Mat(3, 3, DataType<double>::type, R_stereo);
-    T = Mat{-65.0649, -0.139223, 27.6227};
-}
+  double K_left[3][3] = {{995.5872941102477, 0, 507.6322439538547},
+                         {0, 993.1761254348543, 391.3618985410175},
+                         {0, 0, 1}};
+  Mat K_L = cv::Mat(3, 3, cv::DataType<double>::type, K_left);
+  double K_right[3][3] = {{1059.943028057779, 0, 557.0605532130172},
+                          {0, 1058.429107553662, 406.6782374209959},
+                          {0, 0, 1}};
+  Mat K_R = cv::Mat(3, 3, cv::DataType<double>::type, K_right);
+  double R_stereo[3][3] = {
+      {0.9999592144503071, 0.001226048321462626, -0.0089479741527445},
+      {-0.001140372433315718, 0.9999535206231106, 0.009573721541786621},
+      {0.00895929610170791, -0.009563127049233127, 0.9999141351208124}};
+  Mat R = cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
+  Vec3d T = {-65.0649, -0.139223, 27.6227};
 
-void stereo_rectification(const Mat& img_L, const Mat& img_R, const Mat& R,
-                          const Mat& T, const Mat& K_L, const Mat& K_R,
-                          const Mat& D1, const Mat& D2, Mat& image_l_rected,
-                          Mat& image_r_rected) {
   //对照组代码-----------------------------------------------------------------------------
-  /*Mat R_l, R_r, P1, P2, Q;
-  stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);*/
+  cv::Mat R_l, R_r, P1, P2, Q;
+  stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);
   //-----------------------------------------------------------------------------------------
 
   //将cv传递过来的矩阵转为eigen能用的---------
@@ -119,18 +118,16 @@ void stereo_rectification(const Mat& img_L, const Mat& img_R, const Mat& R,
 
   //最后的投影-----------------------
 
-  initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
+  /*cv::initUndistortRectifyMap(K_L, D1, r1, p1, img_L.size(), CV_32F, lmapx,
                               lmapy);
-  initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
-                              rmapy);
-  //对照组
-  /*initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
-                              lmapy);
-  initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
+  cv::initUndistortRectifyMap(K_R, D2, r2, p2, img_R.size(), CV_32F, rmapx,
                               rmapy);*/
-  remap(img_L, image_l_rected, lmapx, lmapy, INTER_LINEAR);
-  remap(img_R, image_r_rected, rmapx, rmapy, INTER_LINEAR);
-  imshow("left.jpg", image_l_rected);
-  imshow("right.jpg", image_r_rected);
-  waitKey(0);
+  //对照组
+  cv::initUndistortRectifyMap(K_L, D1, R_l, P1, img_L.size(), CV_32F, lmapx,
+                              lmapy);
+  cv::initUndistortRectifyMap(K_R, D2, R_r, P2, img_R.size(), CV_32F, rmapx,
+                              rmapy);
+  cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
+  cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
+  // cv::waitKey(0);
 }
