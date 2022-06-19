@@ -8,12 +8,13 @@
 using namespace cv;
 
 TestResult run_testset(const std::string& testset, int method, bool refine,
-                       bool rectify_image) {
+                       bool rectify_image, bool calibrate) {
   Calib calib = read_calib(testset + "/calib.txt");
 
   Mat image_l, image_r;
 
   if (rectify_image) {
+    // 相机拍的就是jpg
     image_l = imread(testset + "/im0.jpg");
     image_r = imread(testset + "/im1.jpg");
   } else {
@@ -34,9 +35,6 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
   std::vector<int> shape2{calib.height, calib.width};
   std::vector<int> shape3{calib.ndisp, calib.height, calib.width};
 
-  Mat image_l_rected{shape2, CV_8UC3};
-  Mat image_r_rected{shape2, CV_8UC3};
-
   Mat cost_l{shape3, CV_32FC1, {0.f}};
   Mat cost_r{shape3, CV_32FC1, {0.f}};
 
@@ -48,13 +46,23 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
 
   Mat disp_out{shape2, CV_32FC1, {0.f}};
 
+  Mat R, T, KL, KR, DL, DR;
+
   using namespace std::chrono;
   high_resolution_clock::time_point t1, t2;
 
   t1 = high_resolution_clock::now();
 
+  if (calibrate)
+    stereo_calib(image_l, image_r, R, T, KL, KR, DL, DR);
+  else
+    preset_steroparams(R, T, KL, KR, DL, DR);
+
   if (rectify_image) {
-    stereo_rectification(image_l, image_r, image_l_rected, image_r_rected);
+    Mat image_l_rected{shape2, CV_8UC3};
+    Mat image_r_rected{shape2, CV_8UC3};
+    stereo_rectification(image_l, image_r, R, T, KL, KR, DL, DR, image_l_rected,
+                         image_r_rected);
     image_l = image_l_rected;
     image_r = image_r_rected;
   }

@@ -14,11 +14,8 @@ using namespace Eigen;
 using namespace cv;
 using namespace std;
 
-void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
-                          const cv::Mat& R, const cv::Mat& T,
-                          const cv::Mat& K_L, const cv::Mat& K_R,
-                          const cv::Mat& D1, const cv::Mat& D2,
-                          Mat& image_l_rected, Mat& image_r_rected) {
+void preset_steroparams(cv::Mat& R, cv::Mat& T, cv::Mat& K_L, cv::Mat& K_R,
+                        cv::Mat& D1, cv::Mat& D2) {
   //代码计算结果
   /*double d_left[1][5] = {-0.2476308740918039, 0.1428984605799336,
  -0.007308380442553203, 0.01834444017828064, -0.1575561255791122}; Mat D1 =
@@ -47,28 +44,33 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
    Mat  R= cv::Mat(3, 3, cv::DataType<double>::type, R_stereo);
    Vec3d T = {-65.0649, -0.139223, 27.6227};*/
 
-  // matlab计算,即对照组
-  /*double d_left[1][5] =
-  {-0.485164739871447,0.552024900666525,0,0,-0.336674278642270}; Mat D1 =
-  cv::Mat(1, 5, cv::DataType<double>::type, d_left); double d_right[1][5] =
-  {-0.424674246902221, 0.00151675029453053, 0 ,0, 0.639005725201348}; Mat D2 =
-  cv::Mat(1, 5, cv::DataType<double>::type, d_right); double K_left[3][3] = {
+  // matlab计算
+  double d_left[1][5] = {-0.485164739871447, 0.552024900666525, 0, 0,
+                         -0.336674278642270};
+  D1 = Mat(1, 5, DataType<double>::type, d_left);
+  double d_right[1][5] = {-0.424674246902221, 0.00151675029453053, 0, 0,
+                          0.639005725201348};
+  D2 = Mat(1, 5, DataType<double>::type, d_right);
+  double K_left[3][3] = {
       1388.19773824506, 0, 0, 0, 1389.01737025501, 0, 590.918909086584,
       360.567076302685, 1};
-  Mat K_L = cv::Mat(3, 3, cv::DataType<double>::type, K_left);
+  K_L = Mat(3, 3, DataType<double>::type, K_left);
   double K_right[3][3] = {
       1386.15194480925, 0, 0, 0, 1390.06465431073, 0, 631.010280569678,
       392.663204621441, 1};
-  Mat K_R = cv::Mat(3, 3, cv::DataType<double>::type, K_right);
+  K_R = Mat(3, 3, DataType<double>::type, K_right);
   double R_stereo[3][3] = {
-      0.999971235342412,-0.00173830599783834,0.00738287071727767,0.00167481635173865,0.999961641851747,0.00859708179243690,-0.00739753188287186,-
-  0.00858446954772283,0.999935789640828}; Mat R = cv::Mat(3, 3,
-  cv::DataType<double>::type, R_stereo); Vec3d T =
-  {-61.7483197328276,3.73154432852811,1.76558076147146};*/
+      0.999971235342412,    -0.00173830599783834, 0.00738287071727767,
+      0.00167481635173865,  0.999961641851747,    0.00859708179243690,
+      -0.00739753188287186, -0.00858446954772283, 0.999935789640828};
+  R = Mat(3, 3, DataType<double>::type, R_stereo);
+  T = Mat{-61.7483197328276, 3.73154432852811, 1.76558076147146};
+}
 
-  const size_t Row = img_L.size[0];  // 1080
-  const size_t Col = img_L.size[1];  // 1920
-
+void stereo_rectification(const Mat& img_L, const Mat& img_R, const Mat& R,
+                          const Mat& T, const Mat& K_L, const Mat& K_R,
+                          const Mat& D1, const Mat& D2, Mat& image_l_rected,
+                          Mat& image_r_rected) {
   //对照组代码-----------------------------------------------------------------------------
   /*cv::Mat R_l, R_r, P1, P2, Q;
   stereoRectify(K_L, D1, K_R, D2, img_L.size(), R, T, R_l, R_r, P1, P2, Q);*/
@@ -77,8 +79,8 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
   //将cv传递过来的矩阵转为eigen能用的---------
   Matrix3d r;
   Vector3d T1;
-  Matrix3d KL;  //
-  Matrix3d KR;  //
+  Matrix3d KL;
+  Matrix3d KR;
   cv2eigen(R, r);
   cv2eigen(T, T1);
   cv2eigen(K_L, KL);
@@ -150,7 +152,7 @@ void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
                               rmapy);*/
   cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
-  cv::imshow("left.jpg", image_l_rected);
+  cv::imshow("left.jpg", image_l);
   cv::imshow("right.jpg", image_r_rected);
   cv::waitKey(0);
 }
