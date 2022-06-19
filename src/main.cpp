@@ -8,7 +8,6 @@
 using namespace cv;
 
 int main(int argc, const char* argv[]) {
-  std::string testset = argc >= 2 ? argv[1] : "data/artroom2";
   std::vector<TestResult> results;
 
   // 只跑代表性的数据

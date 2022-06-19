@@ -12,6 +12,6 @@ cmake --build build
 ## 运行
 
 ```shell
-cmake --build build -t copy-dependency
-cmake --build build -t run
+cmake --build build -t copy-dependency --config release
+cmake --build build -t run --config release
 ```

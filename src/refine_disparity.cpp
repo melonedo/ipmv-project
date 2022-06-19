@@ -42,5 +42,3 @@ void refine_disparity(const Mat& disp_l,
   // imshow("disp1", disp_out);
   // waitKey(1);
 }
-
-// 1.int dl = disp_l.at<uint8_t>(x-dl, y);减去dl不会溢出吗？
