@@ -11,7 +11,8 @@ int main(int argc, const char* argv[]) {
   std::string testset = argc >= 2 ? argv[1] : "data/artroom2";
   std::vector<TestResult> results;
 
-  run_testset("build/ukulele2", USE_SEGMENT_TREE, false, true);
+  run_testset("build/ukulele2", USE_SEGMENT_TREE, false);
+  return 0;
 
   for (const auto& entry : std::filesystem::directory_iterator("data")) {
     if (!entry.is_directory()) continue;

@@ -152,7 +152,7 @@ void stereo_rectification(const Mat& img_L, const Mat& img_R, const Mat& R,
                               rmapy);*/
   cv::remap(img_L, image_l_rected, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img_R, image_r_rected, rmapx, rmapy, cv::INTER_LINEAR);
-  cv::imshow("left.jpg", image_l);
+  cv::imshow("left.jpg", image_l_rected);
   cv::imshow("right.jpg", image_r_rected);
   cv::waitKey(0);
 }
