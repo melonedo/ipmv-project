@@ -31,7 +31,7 @@ Calib read_calib(const std::string& path) {
 // http://netpbm.sourceforge.net/doc/pfm.html
 PFM read_pfm(const std::string& path) {
   PFM ret;
-  FILE* f = fopen(path.c_str(), "r");
+  FILE* f = fopen(path.c_str(), "rb");
   assert(f);
   int n;
   n = fscanf(f, "Pf %d %d %f", &ret.width, &ret.height, &ret.scale);
@@ -43,8 +43,9 @@ PFM read_pfm(const std::string& path) {
   ret.data = cv::Mat(ret.height, ret.width, CV_32FC1);
   // discard next char
   fgetc(f);
-  int count = fread(ret.data.data, 4, ret.width * ret.height, f);
-  // assert(count == ret.width * ret.height);
+  int count = fread(ret.data.data, sizeof(float), ret.width * ret.height, f);
+  assert(count == ret.width * ret.height);
+  // assert(feof(f));
   assert(!ferror(f));
   cv::flip(ret.data, ret.data, 0);
   fclose(f);
