@@ -11,7 +11,7 @@ using namespace Eigen;
 using namespace cv;
 using namespace std;
 
-void stereo_calib(const Mat& img_L, const Mat& img_R, Mat& R, Mat& T,
+void stereo_calib(const Mat& img_L, const Mat& img_R, Mat& R, Vec3d& T,
                   Mat& K_L, Mat& K_R, Mat& D1, Mat& D2) {
   Mat gray_L, gray_R;
   Mat E, F;

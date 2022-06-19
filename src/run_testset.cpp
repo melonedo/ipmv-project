@@ -46,7 +46,8 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
 
   Mat disp_out{shape2, CV_32FC1, {0.f}};
 
-  Mat R, T, KL, KR, DL, DR;
+  Mat R, KL, KR, DL, DR;
+  Vec3d T;
 
   using namespace std::chrono;
   high_resolution_clock::time_point t1, t2;
@@ -56,7 +57,7 @@ TestResult run_testset(const std::string& testset, int method, bool refine,
   if (calibrate)
     stereo_calib(image_l, image_r, R, T, KL, KR, DL, DR);
   else
-    ;  // preset_steroparams(R, T, KL, KR, DL, DR);
+     preset_steroparams(R, T, KL, KR, DL, DR);
 
   if (rectify_image) {
     Mat image_l_rected{shape2, CV_8UC3};
