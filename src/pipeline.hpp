@@ -23,9 +23,6 @@ void refine_disparity(const cv::Mat& disp_l, const cv::Mat& disp_r,
 //                          const cv::Mat& DL, const cv::Mat& DR,
 //                          const cv::Mat& R, const cv::Mat& T, cv::Mat & image_l_rected, cv::Mat& image_r_rected);
 void stereo_rectification(const cv::Mat& img_L, const cv::Mat& img_R,
-                          const cv::Mat& R, const cv::Mat& T,
-                          const cv::Mat& K_L, const cv::Mat& K_R,
-                          const cv::Mat& D1, const cv::Mat& D2,
                           cv::Mat& image_l_rected, cv::Mat& image_r_rected);
                                                                           
 void stereo_calib(const cv::Mat& img_L, const cv::Mat& img_R, cv::Mat& R,
